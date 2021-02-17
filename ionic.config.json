@@ -1,0 +1,7 @@
+{
+  "name": "BelayTimer_V0",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

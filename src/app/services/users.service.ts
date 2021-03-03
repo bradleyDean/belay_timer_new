@@ -9,10 +9,13 @@ import { BehaviorSubject, Observable } from '../../../node_modules/rxjs';
 })
 export class UsersService {
   public usersArray:UserArrayEntry[];
+  private usersSubject:BehaviorSubject<UserArrayEntry[]> = new BehaviorSubject<UserArrayEntry[]>(null);
 
   private ownerSubject: BehaviorSubject<UserArrayEntry> = new BehaviorSubject<UserArrayEntry>(null);
+  //NOTE: Subject.asObservable still DOES send last value to subscriptions
   public owner$:Observable<UserArrayEntry> = this.ownerSubject.asObservable();
-  public serviceIntialized = false;
+  public serviceInitialized = false;
+
 
   constructor(private fService:FilesService ) {
   }
@@ -21,23 +24,32 @@ export class UsersService {
   * @remarks: for each observable property, initialize them.
   * ...the observables might emit null values. Components should
   *    redirect the user to set up the relevant data (owner, users)
+  *    this.serviceIntialized == true <=> an attempt has been made to fetch users and owner
   *
   *
   *
   */
   async init(){
     //TODO: take users array into consideration
-    if (this.ownerSubject.getValue()){
-      this.serviceIntialized = true;
+    if (this.ownerSubject.getValue()){ //<--owner subject was initialized with default stream item = null
+      //There was an owner record (that is why the above condition was truthy)
+      this.serviceInitialized = true; //<-- convenience variable for clients of this service
       return;
     }else{
-      const owner = await this.readOwnerRecord();
-      this.ownerSubject.next(owner);
-      this.serviceIntialized = true;
-      return;
+      const owner = await this.readOwnerRecord(); //this could
+      if (owner) {
+        this.ownerSubject.next(owner);
+        this.serviceInitialized = true;
+        return;
+      }
     }
+
+
   }
 
+  initialized():boolean{
+    return this.serviceInitialized;
+  }
 
   /*
   * @remarks
@@ -60,8 +72,8 @@ export class UsersService {
       return this.usersArray
     }
     catch(error){
-      console.log(`error in users.service, loadUsersArray:`);
-      console.log(error);
+      // console.log(`error in users.service, loadUsersArray:`);
+      // console.log(error);
       return null;
     }
   }
@@ -70,7 +82,7 @@ export class UsersService {
   * @remarks: resolves owner record as UserArrayEntry. Does NOT init
   *    ...owner-related observables.
   *
-  * test complete? yes
+  *  @returns: owner:UserArrayEntry if the record existed. null otherwise.
   */
   async readOwnerRecord():Promise<UserArrayEntry>{
     try{
@@ -102,6 +114,23 @@ export class UsersService {
     return this.ownerSubject.getValue()
   }
 
+  async updateOwner(ownerName:string){
+    console.log(`****** users.service, updateOwner triggered :${ "" } `);
+    this.ownerSubject.next({name:"Test Name", id: 3})
+    try{
+      //get the correct id for the owner
+      const id = await this.generateUserId(ownerName,true);
+      //write the owner record to the database
+      const owner:UserArrayEntry = {name:ownerName, id: id };
+      await this.writeOwnerRecord(owner);
+      //call "next" on the ownerSubject
+      this.ownerSubject.next(owner);
+    }
+    catch(error){
+      throw error;
+    };
+  }
+
   /*
   * @remarks: This method does NOT trigger this.ownerSubject.next(owner)
      ...so, do that after this function resolves if you need to.
@@ -117,8 +146,10 @@ export class UsersService {
       //if the file already exists, delete it and rewrite it
       const file_exists = await this.fService.fileOrDirExists(pathMap['owner']);
       if(file_exists){
-        // console.log(`FILE EXISTED`);
+        // console.log(`*_*_*_*_* Calling deleteOwnerFile !!!`);
         const result = await this.deleteOwnerFile();
+        // console.log(`...done deleteOwnerFile and result is :${ result } `);//
+
         if(!result){
           throw new Error("Could not delete owner file, but it DOES exist!")
         }
@@ -127,7 +158,7 @@ export class UsersService {
       return write_result;
     }
     catch(error){
-      throw error;
+      console.log(error);
     };
   }
 
@@ -139,9 +170,12 @@ export class UsersService {
   */
   async deleteOwnerFile(){
     try{
+      // console.log(`Calling fileOrDirExists !!!!!!!!!!!!!!!!!!! :${ "" } `);
       const exists = await this.fService.fileOrDirExists(pathMap['owner']);
+      // console.log(`PAST call fileOrDirExists !!!!!!!!!!!!! :${ "" } `);
       if(exists) {
         await this.fService.rmFile(pathMap['owner']);
+        // console.log(`MYSTERIOUS ERROR!!!!!!!!!!!! `);
         return true;
       }else{
         return false;
@@ -208,5 +242,31 @@ export class UsersService {
     catch(error){
       throw error;
     };
+  }
+
+  /*
+  * @remarks: if isOwner, return 0 else, return next avaialable index from user array
+  *         throughout logic, maintain this rule: a user's id is their UserArrayEntry's
+  *         index in the usersArray
+  *
+  *
+  */
+  //eventually might want to generate an id by hashing the user name
+  //or making an API call if there is ever a backend to this thing
+  async generateUserId(user_name:string, isOwner = false){
+    if (isOwner){
+      return 0
+    }else{
+      let curr_users = this.usersSubject.getValue();
+      if(!curr_users){
+        curr_users = await this.readUsersArray();
+      }
+      if(curr_users){
+        return curr_users.length;
+      }else{
+        //there are no users left. The first index will be 1;
+        return 1;
+      }
+    }
   }
 }

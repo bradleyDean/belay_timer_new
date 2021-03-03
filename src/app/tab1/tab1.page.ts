@@ -1,9 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FilesService } from '../services/files.service';
 import { UsersService } from '../services/users.service';
 import { UserArrayEntry } from '../interfaces/users';
 import { Subscription } from '../../../node_modules/rxjs';
-
+import { Router  } from '@angular/router';
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
@@ -13,18 +12,30 @@ export class Tab1Page implements OnInit, OnDestroy{
   private owner:UserArrayEntry;
   private ownerSubcrip:Subscription;
 
-  //TODO: remove fService and FilesService import... it is only for testing
-  constructor(private uServ: UsersService, private fService: FilesService) {
+  constructor(private uServ: UsersService, private router: Router) {
     console.log(`Tab1 Constructor `);
   }
 
   async ngOnInit(){
-    if(!this.uServ.serviceIntialized){
+    //*********** for testing only ***************
+    //TODO: Delete this first call to deleteOwnerFile
+    //The folowing line is for testing only.
+    await this.uServ.deleteOwnerFile();
+    //*************************************
+
+    if(!this.uServ.initialized()){
       await this.uServ.init();
     }
-    this.owner = this.uServ.getCurrentOwner();
     this.ownerSubcrip = this.uServ.owner$.subscribe((owner:UserArrayEntry)=>{
       this.owner = owner;
+      console.log(`Tab 1 page and owner is:`);
+      console.log(owner);
+      if(!this.owner){
+        //redirect to users page
+        console.log(`REDIRECTING TO TAB 2 `);
+        this.router.navigate(['/tabs/tab2']);
+      }
+
     });
   }
 
@@ -40,10 +51,6 @@ export class Tab1Page implements OnInit, OnDestroy{
     }
   }
 
-  // fileStatTest(){
-  //   console.log(`Stat Test fired! `);
-  //   this.fService.stat("");
-  // }
 
 
 }

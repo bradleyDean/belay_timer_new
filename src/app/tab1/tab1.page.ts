@@ -3,6 +3,7 @@ import { UsersService } from '../services/users.service';
 import { UserArrayEntry } from '../interfaces/users';
 import { Subscription } from '../../../node_modules/rxjs';
 import { Router  } from '@angular/router';
+
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
@@ -20,7 +21,7 @@ export class Tab1Page implements OnInit, OnDestroy{
     //*********** for testing only ***************
     //TODO: Delete this first call to deleteOwnerFile
     //The folowing line is for testing only.
-    await this.uServ.deleteOwnerFile();
+    // await this.uServ.deleteOwnerFile();
     //*************************************
 
     if(!this.uServ.initialized()){

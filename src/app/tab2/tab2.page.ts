@@ -4,12 +4,13 @@ import { Subject, Subscription, } from '../../../node_modules/rxjs';
 import { UserArrayEntry } from '../interfaces/users';
 
 
+
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
   styleUrls: ['tab2.page.scss']
 })
-export class Tab2Page implements OnInit {
+export class Tab2Page implements OnInit, OnDestroy {
   ownerFieldReadOnly = false;
   ownerNameFromTemplate:string;
 
@@ -23,7 +24,7 @@ export class Tab2Page implements OnInit {
 
   showUpdateOwner:boolean = true;
 
-  constructor(private uServe: UsersService) {}
+  constructor(private uServe: UsersService, )  {}
 
   async ngOnInit(){
 
@@ -59,6 +60,13 @@ export class Tab2Page implements OnInit {
       //when save is tapped, trigger an updateUser method in the user service
       //it should call .next on the ownerSubject.
 
+    }
+  }
+
+  ngOnDestroy(){
+    if(this.ownerSubcrip){
+      this.ownerSubcrip.unsubscribe();
+      this.ownerSubcrip = null;
     }
   }
 

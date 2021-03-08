@@ -11,9 +11,9 @@ import { Router  } from '@angular/router';
 })
 export class Tab1Page implements OnInit, OnDestroy{
   private owner:UserArrayEntry;
-  private ownerSubcrip:Subscription;
+  private ownerSubscrip:Subscription;
 
-  constructor(private uServ: UsersService, private router: Router) {
+  constructor(public uServ: UsersService, private router: Router) {
     console.log(`Tab1 Constructor `);
   }
 
@@ -24,21 +24,24 @@ export class Tab1Page implements OnInit, OnDestroy{
     // await this.uServ.deleteOwnerFile();
     //*************************************
 
+    console.log("Tab1 page, calling uServ.initialized");
     if(!this.uServ.initialized()){
       await this.uServ.init();
     }
-    this.ownerSubcrip = this.uServ.owner$.subscribe((owner:UserArrayEntry)=>{
+    this.ownerSubscrip = this.uServ.owner$.subscribe((owner:UserArrayEntry)=>{
+      // console.log('******* tab1 page, owner is: ******** ')
+      // console.log(owner);
       this.owner = owner;
-      console.log(`Tab 1 page and owner is:`);
-      console.log(owner);
+      // console.log(`Tab 1 page and owner is:`);
+      // console.log(owner);
       if(!this.owner){
-        //redirect to users page
-        console.log(`REDIRECTING TO TAB 2 `);
+        //redirect to u sers page
+        // console.log(`REDIRECTING TO TAB 2 `);
         this.router.navigate(['/tabs/tab2']);
       }
-
     });
   }
+
 
   /*
   * @remarks: for each subscription, see if it is truthy, unsubscribe from it then set it to null
@@ -46,9 +49,9 @@ export class Tab1Page implements OnInit, OnDestroy{
   *
   */
   ngOnDestroy(){
-    if(this.ownerSubcrip){
-      this.ownerSubcrip.unsubscribe();
-      this.ownerSubcrip = null;
+    if(this.ownerSubscrip){
+      this.ownerSubscrip.unsubscribe();
+      this.ownerSubscrip = null;
     }
   }
 

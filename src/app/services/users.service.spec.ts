@@ -1,6 +1,7 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
 
 import { UsersService } from './users.service';
+import { FilesService } from './files.service';
 
 import { pathMap } from '../shared_constants/paths';
 import { UserArrayEntry } from '../interfaces/users';
@@ -41,6 +42,32 @@ const objects_match_checker = (obj_1:any, obj_2:any)=>{
     return el === true  ;
   })
 }
+describe("Users Service: Isolated Tests",(  )=>{
+  let uServ: UsersService;
+  let filesServiceSpy:jasmine.SpyObj<FilesService>;
+
+  beforeEach(() => {
+    const spy = jasmine.createSpyObj('FilesService',['fileRead'] )
+    TestBed.configureTestingModule({
+      providers:[
+        UsersService,
+        {provide: FilesService, useValue: spy}
+    ]});
+    uServ = TestBed.inject(UsersService);
+    filesServiceSpy = TestBed.inject(FilesService) as jasmine.SpyObj<FilesService>
+  });
+
+  it('readOwnerRecord: case 1-> owner record exists, so should return the owner\
+   record provided by fileServiceSpy', waitForAsync(async ()=>{
+    const stubVal = owner_record ;
+    // filesServiceSpy.fileRead.and.returnValue(Promise.resolve(stubVal));
+    filesServiceSpy.fileRead.and.resolveTo(owner_record);
+    const currOwner = await uServ.readOwnerRecord();
+    expect(currOwner).toBe(stubVal);
+
+  }))
+
+});
 
 describe('UsersService', () => {
   let service: UsersService;

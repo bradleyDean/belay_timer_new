@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FilesService } from '../services/files.service';
 import { pathMap } from '../shared_constants/paths';
 import { UserArrayEntry } from '../interfaces/users';
-import { BehaviorSubject, Observable } from '../../../node_modules/rxjs';
+import { BehaviorSubject, Observable,ReplaySubject } from '../../../node_modules/rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -36,9 +36,9 @@ export class UsersService {
       this.serviceInitialized = true; //<-- convenience variable for clients of this service
       return;
     }else{
-      const owner = await this.readOwnerRecord(); //this could
+      const owner = await this.readOwnerRecord(); //this could resolve to null;
       if (owner) {
-        this.ownerSubject.next(owner);
+        this.ownerSubject.next(owner); //<-- this CAN emit null
         this.serviceInitialized = true;
         return;
       }

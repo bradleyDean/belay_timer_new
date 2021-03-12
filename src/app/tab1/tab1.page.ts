@@ -13,7 +13,7 @@ export class Tab1Page implements OnInit, OnDestroy{
   private owner:UserArrayEntry;
   private ownerSubscrip:Subscription;
 
-  constructor(public uServ: UsersService, private router: Router) {
+  constructor(public uServ: UsersService, public router: Router) {
     console.log(`Tab1 Constructor `);
   }
 
@@ -24,19 +24,18 @@ export class Tab1Page implements OnInit, OnDestroy{
     // await this.uServ.deleteOwnerFile();
     //*************************************
 
+
     console.log("Tab1 page, calling uServ.initialized");
     if(!this.uServ.initialized()){
       await this.uServ.init();
     }
     this.ownerSubscrip = this.uServ.owner$.subscribe((owner:UserArrayEntry)=>{
-      // console.log('******* tab1 page, owner is: ******** ')
-      // console.log(owner);
       this.owner = owner;
-      // console.log(`Tab 1 page and owner is:`);
-      // console.log(owner);
+      console.log('Tab1Page got owner as:');
+      console.log(this.owner);
       if(!this.owner){
-        //redirect to u sers page
-        // console.log(`REDIRECTING TO TAB 2 `);
+        console.log('In page one, about to navigate and router is:');
+        console.log(this.router);
         this.router.navigate(['/tabs/tab2']);
       }
     });

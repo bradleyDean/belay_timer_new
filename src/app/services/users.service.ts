@@ -9,7 +9,11 @@ import { BehaviorSubject, Observable,ReplaySubject } from '../../../node_modules
 })
 export class UsersService {
   public usersArray:UserArrayEntry[];
-  private usersSubject:BehaviorSubject<UserArrayEntry[]> = new BehaviorSubject<UserArrayEntry[]>(null);
+  private usersSubject:BehaviorSubject<UserArrayEntry[]> = new BehaviorSubject<UserArrayEntry[]>([]);
+
+  //the "selected" user, i.e. the owner's climbing partner today
+  private selUserSubject:BehaviorSubject<UserArrayEntry> = new BehaviorSubject<UserArrayEntry>(null);
+  public selUser$:Observable<UserArrayEntry> = this.selUserSubject.asObservable();
 
   private ownerSubject: BehaviorSubject<UserArrayEntry> = new BehaviorSubject<UserArrayEntry>(null);
   //NOTE: Subject.asObservable still DOES send last value to subscriptions
@@ -29,7 +33,7 @@ export class UsersService {
   *
   *
   */
-  async init(){
+  async init_old(){
     //TODO: take users array into consideration
     if (this.ownerSubject.getValue()){ //<--owner subject was initialized with default stream item = null
       //There was an owner record (that is why the above condition was truthy)
@@ -43,8 +47,25 @@ export class UsersService {
         return;
       }
     }
+  }
 
-
+  async init(){
+     //ownerSubject and usersSubject were initialized with default stream item = null
+    if (this.ownerSubject.getValue() && this.usersSubject.getValue().length > 0){
+      //There was an owner record (that is why the above condition was truthy)
+      this.serviceInitialized = true; //<-- convenience variable for clients of this service
+      return;
+    }else{
+      const owner = await this.readOwnerRecord(); //this could resolve to null;
+      const usersArray = await this.readUsersArray();
+      if (owner) {
+        this.ownerSubject.next(owner); //<-- this CAN emit null
+      }
+      if(usersArray && usersArray.length > 0){
+        this.usersSubject.next(usersArray);
+        this.selUserSubject.next(usersArray[0]); //<-- the selected user is the first user in the array
+      }
+    }
   }
 
   initialized():boolean{
@@ -89,11 +110,11 @@ export class UsersService {
       // console.log(`pathMap is:`);
       // console.log(pathMap);
 
-      const users_string = await  this.fService.fileRead(pathMap['owner']);
-      console.log('in readUsersArray:.......')
-      console.log(users_string);
+      const owner_rec = await  this.fService.fileRead(pathMap['owner']);
+      console.log('in readOwnerRecord:.......')
+      console.log(owner_rec);
       // this.usersArray = JSON.parse(users_string) as UserArrayEntry[];
-      const owner = users_string ? users_string : null as UserArrayEntry ;
+      const owner = owner_rec ? owner_rec : null as UserArrayEntry ;
       // console.log('Got usersArray as: ')
       // console.log(this.usersArray);
       return owner;
@@ -112,6 +133,10 @@ export class UsersService {
   */
   getCurrentOwner(){
     return this.ownerSubject.getValue()
+  }
+
+  getCurrentSelUser(){
+    return this.usersSubject.getValue().length > 0 ? this.usersSubject[0] : null;
   }
 
   async updateOwner(ownerName:string){

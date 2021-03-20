@@ -24,42 +24,41 @@ export class Tab2Page implements OnInit, OnDestroy {
 
   showUpdateOwner:boolean = true;
 
-  constructor(private uServe: UsersService, )  {}
+  constructor(private uServ: UsersService, )  {}
 
   async ngOnInit(){
 
-    //for testing:
-    // await this.uServe.deleteOwnerFile();
-    // ...the above line is for testing
-
-    if(!this.uServe.initialized()){
-      await this.uServe.init();
+    //After uServ is initialized, it has an owner record and usersArray if available in the file sys
+    if(!this.uServ.initialized()){
+      await this.uServ.init();
     }
     //usServe is now initialized. Is there an owner set up?
-    console.log(`CHECKING getCurrentOwner and getCurrentOwner returns : `);
-    console.log(this.uServe.getCurrentOwner());
-    if(!this.uServe.getCurrentOwner()){
-      console.log(`**** Setting up owner subscription ******** :${ "" } `);
-      //subscribe to the user service's owner$
-      /*
-      *  ownerSubcrip controls showing and hiding the owner input box and save save button
-      */
-      this.ownerSubcrip = this.uServe.owner$.subscribe(( owner )=>{
-        console.log(`ownerSubscrip Triggered !!!!!!!!!!!!!!`);
-        this.owner = owner;
-        //if that was a valid owner (not null) then hide the owner input stuff
-        if(owner && !this.ownerChangeRequested){//<--don't hide owner input box if trying to update owner
-          this.showUpdateOwner = false;
-        }
+    // console.log(`CHECKING getCurrentOwner and getCurrentOwner returns : `);
+    // console.log(this.uServe.getCurrentOwner());
+    console.log(`**** Setting up owner subscription ******** :${ "" } `);
+    //subscribe to the user service's owner$
+    /*
+    *  ownerSubcrip controls showing and hiding the owner input box and save save button
+    */
+    this.ownerSubcrip = this.uServ.owner$.subscribe(( owner )=>{
+      console.log(`ownerSubscrip Triggered !!!!!!!!!!!!!!`);
+      this.owner = owner;
+      //if that was a valid owner (not null) then hide the owner input stuff
+      if(owner && !this.ownerChangeRequested){//<--don't hide owner input box if trying to update owner
+        this.showUpdateOwner = false;
+      }
+      if(!owner){
+        this.showUpdateOwner = true;
+      }
+    });
+    //when save is tapped, trigger an updateUser method in the user service
+    //it should call .next on the ownerSubject.
 
-        if(!owner){
-          this.showUpdateOwner = true;
-        }
-      });
-
-      //when save is tapped, trigger an updateUser method in the user service
-      //it should call .next on the ownerSubject.
-
+    if(!this.uServ.getCurrentSelUser()){
+      //by default, the current selected user is the first user in the usersArray
+      //if there is no current selected user, then that array is empty, so
+      //show add users template stuff...
+      //******* TODO ************
     }
   }
 
@@ -72,11 +71,11 @@ export class Tab2Page implements OnInit, OnDestroy {
 
   async updateOwner(){
     //send the new value to the UsersService
-    this.uServe.updateOwner(this.ownerNameFromTemplate);
+    this.uServ.updateOwner(this.ownerNameFromTemplate);
     //NOTE: the ownerSubscrip hides the owner input stuff on the template when
     //the updated owner is emitted by owner$
-
   }
+
 
   onDestroy(){
     this.ownerSubcrip.unsubscribe();

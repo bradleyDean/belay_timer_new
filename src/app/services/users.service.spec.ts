@@ -27,7 +27,6 @@ const owner_record: UserArrayEntry = {
     name: "Alice"
   }
 
-
 const objects_match_checker = (obj_1:any, obj_2:any)=>{
   let match_arr = Object.keys(obj_1).map(key => {
     try{
@@ -42,6 +41,7 @@ const objects_match_checker = (obj_1:any, obj_2:any)=>{
     return el === true  ;
   })
 }
+
 describe("Users Service: Isolated Tests",(  )=>{
   let uServ: UsersService;
   let filesServiceSpy:jasmine.SpyObj<FilesService>;
@@ -64,12 +64,10 @@ describe("Users Service: Isolated Tests",(  )=>{
     filesServiceSpy.fileRead.and.resolveTo(owner_record);
     const currOwner = await uServ.readOwnerRecord();
     expect(currOwner).toBe(stubVal);
-
   }))
-
 });
 
-describe('UsersService', () => {
+describe('UsersService: Integration test (using real FileSystem service)', () => {
   let service: UsersService;
 
   beforeEach(() => {
@@ -77,36 +75,31 @@ describe('UsersService', () => {
     service = TestBed.inject(UsersService);
   });
 
+  afterEach(async (done:DoneFn)=>{
+    await service.deleteOwnerFile();
+    await service.deleteUsersFile();
+    done();
+  });
+
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should write a user array to the file system', async (done: DoneFn)=>{
+  it('should write and read a user array to/from the file system', async (done: DoneFn)=>{
 
     const test_users_arr = get_test_user_array();
     await service.writeUsersArray(test_users_arr);
     const users_from_file_sys = await service.readUsersArray();
     await service.deleteUsersFile();
 
-    const matches = users_from_file_sys.map((u,i)=>{
-      return objects_match_checker(u,test_users_arr[i])
-    })
-
-    const same = matches.every(( item )=>{
-      return item === true;
-    });
-
-    expect(same).toBe(true);
+    expect(users_from_file_sys).toEqual(test_users_arr);
     done();
-
-
   })
 
   it('readOwnerRecord should return null if owner file does not exist',
       async ( done:DoneFn )=>{
     try{
       //lkjhdkjlhds
-
       await service.deleteOwnerFile();
       const record = await service.readOwnerRecord();
       expect(record).toBe(null);
@@ -116,6 +109,21 @@ describe('UsersService', () => {
       throw error;
     };
   });
+
+  it('readUsersArray should return null if users file does not exist',
+      async ( done:DoneFn )=>{
+    try{
+      //lkjhdkjlhds
+      await service.deleteUsersFile();
+      const record = await service.readUsersArray();
+      expect(record).toBe(null);
+      done();
+    }
+    catch(error){
+      throw error;
+    };
+  });
+
 
   it('should write and read an owner record', async ( done:DoneFn )=>{
     try{
@@ -131,17 +139,85 @@ describe('UsersService', () => {
     };
   });
 
+  it('should write and read a usersArray record', async ( done:DoneFn )=>{
+    try{
+      await service.deleteUsersFile();
+      const test_users_arr = get_test_user_array();
+      await service.writeUsersArray( test_users_arr  );//
+      const record = await service.readUsersArray();
+      await service.deleteUsersFile();
+      // expect(objects_match_checker(owner_record,record)).toBe(true);
+      expect(record).toEqual(test_users_arr);
+      done();
+    }
+    catch(error){
+      throw error; //
+    };
+  });
+
   it('init should initialialize ownerSubject and owner$ properties when NO ownerFileExists,\
    then owner$ should emit null', async (done:DoneFn)=>{
     await service.deleteOwnerFile();
     await service.init();
-    const ownerSubject_exists = !!service.owner$;
+    const ownerSubject_exists = !!service["ownerSubject"];
+    const owner$_exists = !!service.owner$;
     // console.log(` <<*********** >>>> ownerSubject_exists :${ ownerSubject_exists } <<***********`);
-    const observables_emitted_null = service.getCurrentOwner() === null ;
+    // const observables_emitted_null = service.getCurrentOwner() === null ;
 
-    // console.log(` <<*********** >>>> observables_emitted_null :${ observables_emitted_null } <<***********`);
-    expect(ownerSubject_exists && observables_emitted_null).toBe(true);
-    done();
+    const subscrip = service.owner$.subscribe((owner)=>{
+
+      expect(ownerSubject_exists).toBe(true);
+      expect(owner$_exists).toBe(true);
+      expect(owner).toBe(null);
+      done();
+    });
+
+    subscrip.unsubscribe();
+  });
+
+
+  it('init should initialialize usersSubject and selUserSubject properties when\
+   Ǝ NO users record, then usersSubject should emit [] and selUser$ should emit null', async (done:DoneFn)=>{
+    await service.deleteUsersFile();
+    await service.init();
+    const usersSubject_exists = !!service["usersSubject"];
+    const selUser$_exists = !!service.selUser$;
+    // console.log(` <<*********** >>>> ownerSubject_exists :${ ownerSubject_exists } <<***********`);
+    const subscrip = service.selUser$.subscribe(async ( user:UserArrayEntry )=>{
+
+      expect(usersSubject_exists).toBe(true);
+      expect(selUser$_exists).toBe(true);
+      expect(user).toBe(null);
+      done();
+
+    });
+
+    subscrip.unsubscribe();
+  });
+
+it('init should initialialize usersSubject and selUserSubject properties when\
+   Ǝ a users record, then usersSubject should emit the usersArray and selUser$\
+    should emit the zeroth item in the array ', async (done:DoneFn)=>{
+    await service.deleteUsersFile();
+    //Write a user record for the service to read.
+
+    const testUsers = get_test_user_array();
+    let testSelUser = testUsers[0];
+    await service.writeUsersArray(testUsers);
+
+    await service.init();
+    const usersSubject_exists = !!service["usersSubject"];
+    const selUser$_exists = !!service.selUser$;
+    // console.log(` <<*********** >>>> ownerSubject_exists :${ ownerSubject_exists } <<***********`);
+
+    const subscrip = service.selUser$.subscribe(async ( user:UserArrayEntry )=>{
+      expect(usersSubject_exists).toBe(true);
+      expect(selUser$_exists).toBe(true);
+      expect(user).toEqual(testSelUser);
+      await service.deleteUsersFile();
+      done();
+    });
+    subscrip.unsubscribe();
   });
 
   it('init should initialize ownerSubject and owner$ properties when owner file exists,\
@@ -150,12 +226,12 @@ describe('UsersService', () => {
     await service.writeOwnerRecord(owner_record);
     await service.init();//gdsfsdgf
     // const ownerSubject_exists = !!service.owner$;
-    const ownerSubcrip = service.owner$.subscribe(( owner )=>{
+    const ownerSubcrip = service.owner$.subscribe(async ( owner )=>{
       expect( objects_match_checker(owner_record, owner) === true ).toBe(true);
+      await service.deleteOwnerFile();
       done();
     });
     ownerSubcrip.unsubscribe();
-    service.deleteOwnerFile();
   })
 
 });

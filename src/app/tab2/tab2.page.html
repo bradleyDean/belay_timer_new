@@ -19,4 +19,11 @@
     <button  (click)="updateOwner()">Save</button>
   </div>
   <h1>{{ownerNameFromTemplate}}</h1>
+
+  <div class="" *ngIf="showUsersEditor">
+    <label >Enter the name of a new climbing partner:</label>
+      <ion-input  [(ngModel)]="newUser"> </ion-input>
+    <button  (click)="updateNewUser()">Save</button>
+  </div>
+
 </ion-content>

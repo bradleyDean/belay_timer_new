@@ -10,6 +10,7 @@ import { BehaviorSubject, Observable,ReplaySubject } from '../../../node_modules
 export class UsersService {
   public usersArray:UserArrayEntry[];
   private usersSubject:BehaviorSubject<UserArrayEntry[]> = new BehaviorSubject<UserArrayEntry[]>([]);
+  public users$:Observable<UserArrayEntry[]> = this.usersSubject.asObservable();
 
   //the "selected" user, i.e. the owner's climbing partner today
   private selUserSubject:BehaviorSubject<UserArrayEntry> = new BehaviorSubject<UserArrayEntry>(null);
@@ -131,10 +132,18 @@ export class UsersService {
   *
   * test complete? No
   */
+  //Guarantee that this returns null if there is no owner record available
   getCurrentOwner(){
-    return this.ownerSubject.getValue()
+    return this.ownerSubject.getValue();
   }
 
+  getCurrentUsersArray(){
+    return this.usersSubject.getValue();
+
+  }
+
+  //Guarantee that this returns null if there is no usersRecord or it is empty
+  //The selected user should always be the zeroth item in the usersSubject's current value (or null)
   getCurrentSelUser(){
     return this.usersSubject.getValue().length > 0 ? this.usersSubject[0] : null;
   }
@@ -229,7 +238,7 @@ export class UsersService {
   *
   * test complete: yes
   */
-  async writeUsersArray(users:UserArrayEntry[]){
+  async  writeUsersArray(users:UserArrayEntry[]){
     const users_JSON = JSON.stringify(users);
     // console.log('writing JSON to file: ')
     // console.log(users_JSON)
@@ -246,6 +255,44 @@ export class UsersService {
       return write_result;
     }
     catch(error){
+      throw error;
+    };
+  }
+
+  isUniqueUserName(name:string){
+      const currUsers = this.getCurrentUsersArray();
+      const owner = this.getCurrentOwner();
+      return currUsers.filter((user)=>{
+        return (user.name == name);
+      }).length == 0 && name != owner.name;
+      //
+  }
+
+  /*
+  * @remarks:
+  * @params:
+  */
+  async updateUsersArray(newUserName:string, selected:boolean = false){
+    try{
+      if(!this.isUniqueUserName(newUserName)){
+        let e = new Error("User name is not unique.");
+        throw e;
+      }
+      let currUsers = this.getCurrentUsersArray();
+      const id = await this.generateUserId(newUserName);
+      const newUser:UserArrayEntry = {name: newUserName, id: id }
+
+      if(selected){
+        currUsers.unshift(newUser);
+        this.selUserSubject.next(newUser)
+      }else{
+        currUsers.push(newUser);
+      }
+        await this.writeUsersArray(currUsers);
+        this.usersSubject.next(currUsers);
+
+    }catch(error){
+      console.log(error);
       throw error;
     };
   }
@@ -278,6 +325,8 @@ export class UsersService {
   */
   //eventually might want to generate an id by hashing the user name
   //or making an API call if there is ever a backend to this thing
+  //This is a terrible way to generate user Id's. There will be collisions.
+  //Replace this with a better system!
   async generateUserId(user_name:string, isOwner = false){
     if (isOwner){
       return 0

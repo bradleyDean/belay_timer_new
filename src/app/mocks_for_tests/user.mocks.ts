@@ -13,6 +13,26 @@ export const owner_record_2: UserArrayEntry = {
     id: 3,
     name: "Bradley"
   }
+
+export const get_test_user_array = ():UserArrayEntry[] =>{
+
+  return [
+  {
+    id: 1,
+    name: "Bob"
+  },
+  {
+    id: 2,
+    name: "Claire"
+  },
+  {
+    id: 3,
+    name: "Dan"
+  } ]
+}
+
+export const test_user_arr = get_test_user_array();
+
 const filesService = new FilesService();
 
 export class MockUsersService extends UsersService{

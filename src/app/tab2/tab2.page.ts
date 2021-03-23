@@ -23,6 +23,11 @@ export class Tab2Page implements OnInit, OnDestroy {
   ownerChangeRequested: false;
 
   showUpdateOwner:boolean = true;
+  showUsersEditor:boolean = true;
+
+  newUser:string = null;
+
+  displayDuplicateUserNameMessage = false;
 
   constructor(private uServ: UsersService, )  {}
 
@@ -74,6 +79,23 @@ export class Tab2Page implements OnInit, OnDestroy {
     this.uServ.updateOwner(this.ownerNameFromTemplate);
     //NOTE: the ownerSubscrip hides the owner input stuff on the template when
     //the updated owner is emitted by owner$
+  }
+
+  async updateNewUser(){
+    // this.uServ.update
+    try{
+      //try to update the new user in users service
+      await this.uServ.updateUsersArray(this.newUser);
+    }
+    catch(error){
+      //if the service threw an error
+      if(error.message == "User name is not unique."){
+        this.displayDuplicateUserNameMessage = true;
+        this.newUser = null;
+      }
+        //was it a duplicate user name error?
+        //yes-> display message and ask user to try again
+    };
   }
 
 

@@ -21,17 +21,18 @@ export class Tab1Page implements OnInit, OnDestroy{
   }
 
   async ngOnInit(){
-    //*********** for testing only ***************
-    //TODO: Delete this first call to deleteOwnerFile
-    //The folowing line is for testing only.
-    await this.uServ.deleteOwnerFile();
-    //*************************************
+    // // *********** for testing only ***************
+    // //TODO: Delete this first call to deleteOwnerFile
+    // //The folowing line is for testing only.
+    // await this.uServ.deleteOwnerFile();
+    // //*************************************
 
 
-    console.log("Tab1 page, calling uServ.initialized");
-    if(!this.uServ.initialized()){
-      await this.uServ.init();
-    }
+    // console.log("Tab1 page, calling uServ.initialized");
+    // if(!this.uServ.initialized()){
+    //   await this.uServ.init();
+    // }
+
     //try to set up owner, if not available, navigate to tabs2 page for owner setup
     this.ownerSubscrip = this.uServ.owner$.subscribe((owner:UserArrayEntry)=>{
       this.owner = owner;

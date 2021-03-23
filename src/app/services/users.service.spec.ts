@@ -42,12 +42,30 @@ const objects_match_checker = (obj_1:any, obj_2:any)=>{
   })
 }
 
+// describe("Users Service: With UsersService as Spy",(  )=>{
+//   let uServ: UsersService;
+//   // let filesServiceSpy:jasmine.SpyObj<FilesService>;
+//   let uServSpy:jasmine.SpyObj<UsersService>;
+//
+//   beforeEach(() => {
+//     // const spy = jasmine.createSpyObj('FilesService',['fileRead'] );
+//     const spy = jasmine.createSpyObj('UsersService',['isUniqueUserName'])
+//     TestBed.configureTestingModule({
+//       providers:[
+//         {provide: UsersService, useValue: spy}
+//     ]});
+//     uServ = TestBed.inject(UsersService);
+//     // filesServiceSpy = TestBed.inject(FilesService) as jasmine.SpyObj<FilesService>
+//   });
+//
+// });
+
 describe("Users Service: Isolated Tests",(  )=>{
   let uServ: UsersService;
   let filesServiceSpy:jasmine.SpyObj<FilesService>;
 
   beforeEach(() => {
-    const spy = jasmine.createSpyObj('FilesService',['fileRead'] )
+    const spy = jasmine.createSpyObj('FilesService',['fileRead'] );
     TestBed.configureTestingModule({
       providers:[
         UsersService,
@@ -65,6 +83,62 @@ describe("Users Service: Isolated Tests",(  )=>{
     const currOwner = await uServ.readOwnerRecord();
     expect(currOwner).toBe(stubVal);
   }))
+
+  it('isUniqueUserName should return false if name is in usersArray ', ( )=>{
+     const getCurrentOwnerSpy = spyOn(uServ, "getCurrentOwner");
+     const getCurrentUsersSpy = spyOn(uServ, "getCurrentUsersArray");
+
+     getCurrentOwnerSpy.and.returnValue(owner_record);
+     getCurrentUsersSpy.and.returnValue(get_test_user_array());
+
+     const result = uServ.isUniqueUserName(get_test_user_array()[0].name)
+     expect(result).toBe(false);
+   });
+
+  it('isUniqueUserName should return false if name matches the owner name', ( )=>{
+     const getCurrentOwnerSpy = spyOn(uServ, "getCurrentOwner");
+     const getCurrentUsersSpy = spyOn(uServ, "getCurrentUsersArray");
+
+     getCurrentOwnerSpy.and.returnValue(owner_record);
+     getCurrentUsersSpy.and.returnValue(get_test_user_array());
+
+     const result = uServ.isUniqueUserName(owner_record.name)
+     expect(result).toBe(false);
+   });
+
+  it('isUniqueUserName should return true if name matches neither the owner\
+  name, nor any name in the userArray', ( )=>{
+     const getCurrentOwnerSpy = spyOn(uServ, "getCurrentOwner");
+     const getCurrentUsersSpy = spyOn(uServ, "getCurrentUsersArray");
+
+     getCurrentOwnerSpy.and.returnValue(owner_record);
+     getCurrentUsersSpy.and.returnValue(get_test_user_array());
+
+     const result = uServ.isUniqueUserName(owner_record.name + "dsf;gkljh")
+     expect(result).toBe(true);
+   });
+
+  it('updateUsersArray should throw duplicate name error if name is duplicate',
+  async (done: DoneFn)=>{
+     const getCurrentOwnerSpy = spyOn(uServ, "getCurrentOwner");
+     const getCurrentUsersSpy = spyOn(uServ, "getCurrentUsersArray");
+
+     getCurrentOwnerSpy.and.returnValue(owner_record);
+     getCurrentUsersSpy.and.returnValue(get_test_user_array());
+
+     try{
+      await uServ.updateUsersArray(get_test_user_array()[0].name);
+     }
+     catch(error){
+       console.log(error);
+       expect(error).toBeTruthy();
+       done();
+     };
+
+  });
+
+
+
 });
 
 describe('UsersService: Integration test (using real FileSystem service)', () => {
@@ -95,6 +169,7 @@ describe('UsersService: Integration test (using real FileSystem service)', () =>
     expect(users_from_file_sys).toEqual(test_users_arr);
     done();
   })
+
 
   it('readOwnerRecord should return null if owner file does not exist',
       async ( done:DoneFn )=>{
@@ -233,5 +308,32 @@ it('init should initialialize usersSubject and selUserSubject properties when\
     });
     ownerSubcrip.unsubscribe();
   })
+
+  fit('updateUsersArray should trigger usersSubject.next and update the users\
+   record',
+  async (done: DoneFn)=>{
+     const getCurrentOwnerSpy = spyOn(service, "getCurrentOwner");
+     const getCurrentUsersSpy = spyOn(service, "getCurrentUsersArray");
+
+     getCurrentOwnerSpy.and.returnValue(owner_record);
+     getCurrentUsersSpy.and.returnValue(get_test_user_array());
+
+     try{
+       const uniqueNewUserName = get_test_user_array()[0].name + "dfglkjh";
+
+       //call updateUsersArray with a unique name, and set it to selected user
+      await service.updateUsersArray(uniqueNewUserName,true);
+
+      let usersSubscrip = service.users$.subscribe(async (users:UserArrayEntry[])=>{
+         expect(users[0].name).toEqual(uniqueNewUserName);
+         const usersArrayFromFileSys = await service.readUsersArray();
+         expect(usersArrayFromFileSys[0].name).toEqual(uniqueNewUserName)
+         done();
+       });
+     }
+     catch(error){
+       console.log(error);
+     };
+  });
 
 });

@@ -17,19 +17,37 @@ export class Tab2Page implements OnInit, OnDestroy {
   showSaveOwnerButton:boolean = false;
 
   ownerSubcrip:Subscription;
-  owner: UserArrayEntry;
+  owner: UserArrayEntry=null;
 
+  usersSubscrip: Subscription;
+  users: UserArrayEntry[];
+
+  displayUsers: UserArrayEntry[];//display this in the template. Order by alphabetical, most recent, etc.
+
+  selectedUser:UserArrayEntry;//keep this pointing to the zeroth user in users;
+
+  /*
+   For next session:
+  Start building out the add user template logic.
+    -Adding users vs displaying and selecting climbing partner.
+    -Display modes: alphabetical, vs. last climbed with.
+  Remember: use the displayUsers array for actually displaying/selecting in the template.
+  */
 
   ownerChangeRequested: false;
 
   showUpdateOwner:boolean = true;
   showUsersEditor:boolean = true;
 
-  newUser:string = null;
+  newUserName:string = null;
 
   displayDuplicateUserNameMessage = false;
 
-  constructor(private uServ: UsersService, )  {}
+  length:any;
+
+  constructor(private uServ: UsersService, )  {
+    // this.length = String.length;
+  }
 
   async ngOnInit(){
 
@@ -56,8 +74,15 @@ export class Tab2Page implements OnInit, OnDestroy {
         this.showUpdateOwner = true;
       }
     });
-    //when save is tapped, trigger an updateUser method in the user service
-    //it should call .next on the ownerSubject.
+
+
+    //TODO: write tests for this subscription
+    this.usersSubscrip = this.uServ.users$.subscribe((users)=>{
+      this.users = users;
+      if(!this.users || this.users && this.users.length == 0){
+        this.showUsersEditor;
+      }
+    });
 
     if(!this.uServ.getCurrentSelUser()){
       //by default, the current selected user is the first user in the usersArray
@@ -80,24 +105,27 @@ export class Tab2Page implements OnInit, OnDestroy {
     //NOTE: the ownerSubscrip hides the owner input stuff on the template when
     //the updated owner is emitted by owner$
   }
-
+  /*
+  *
+  *
+  */
   async updateNewUser(){
-    // this.uServ.update
     try{
-      //try to update the new user in users service
-      await this.uServ.updateUsersArray(this.newUser);
+      await this.uServ.updateUsersArray(this.newUserName);
+      this.newUserName = null;
+
     }
     catch(error){
       //if the service threw an error
-      if(error.message == "User name is not unique."){
+      if(error.message == "Duplicate user name."){
         this.displayDuplicateUserNameMessage = true;
-        this.newUser = null;
+        this.newUserName = null;
+        // throw(error);
+      }else{
+        console.log(error);
       }
-        //was it a duplicate user name error?
-        //yes-> display message and ask user to try again
     };
   }
-
 
   onDestroy(){
     this.ownerSubcrip.unsubscribe();

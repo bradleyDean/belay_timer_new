@@ -14,6 +14,10 @@ import { UsersService } from '../services/users.service';
 *     state will trigger different behavior in ngOnInit. To thoroughly test
 *     ngOnInit, select the correct describe block, below.
 *
+* @TODO: using router guard now, so ngOninit is not responsible for initial setup
+*        and initial routing. Tests are still passing, but they should be reviewd
+*        in light of this change.
+*
 */
 
 describe('Tab1page, uServ mocked with NO initial owner and NO selUser', () => {

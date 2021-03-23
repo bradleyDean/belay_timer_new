@@ -50,7 +50,14 @@ export class UsersService {
     }
   }
 
+  async resetForTesting(){
+    await this.deleteOwnerFile();
+    await this.deleteUsersFile();
+  }
   async init(){
+
+    await this.resetForTesting();
+
      //ownerSubject and usersSubject were initialized with default stream item = null
     if (this.ownerSubject.getValue() && this.usersSubject.getValue().length > 0){
       //There was an owner record (that is why the above condition was truthy)
@@ -148,12 +155,21 @@ export class UsersService {
     return this.usersSubject.getValue().length > 0 ? this.usersSubject[0] : null;
   }
 
+  //This only update's the owner's name. All of the related data are preserved
+  // the owner's id is also preserved
   async updateOwner(ownerName:string){
-    console.log(`****** users.service, updateOwner triggered :${ "" } `);
-    this.ownerSubject.next({name:"Test Name", id: 3})
+    // console.log(`****** users.service, updateOwner triggered :${ "" } `);
+    // this.ownerSubject.next({name:"Test Name", id: 3})
     try{
       //get the correct id for the owner
-      const id = await this.generateUserId(ownerName,true);
+      const currOwner = this.ownerSubject.getValue();
+      let id: number;
+
+      if(currOwner){
+        id = currOwner.id;
+      }else{
+        id = await this.generateUserId(ownerName,true);
+      }
       //write the owner record to the database
       const owner:UserArrayEntry = {name:ownerName, id: id };
       await this.writeOwnerRecord(owner);
@@ -262,9 +278,14 @@ export class UsersService {
   isUniqueUserName(name:string){
       const currUsers = this.getCurrentUsersArray();
       const owner = this.getCurrentOwner();
+      const matchesOwner = owner ? owner.name == name : false;
       return currUsers.filter((user)=>{
-        return (user.name == name);
-      }).length == 0 && name != owner.name;
+        if(user){
+          return (user.name == name);
+        }else{
+          return false;
+        }
+      }).length == 0 && !matchesOwner;
       //
   }
 
@@ -275,7 +296,7 @@ export class UsersService {
   async updateUsersArray(newUserName:string, selected:boolean = false){
     try{
       if(!this.isUniqueUserName(newUserName)){
-        let e = new Error("User name is not unique.");
+        let e = new Error("Duplicate user name.");
         throw e;
       }
       let currUsers = this.getCurrentUsersArray();

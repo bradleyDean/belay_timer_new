@@ -328,7 +328,9 @@ it('init should initialialize usersSubject and selUserSubject properties when\
          expect(users[0].name).toEqual(uniqueNewUserName);
          const usersArrayFromFileSys = await service.readUsersArray();
          expect(usersArrayFromFileSys[0].name).toEqual(uniqueNewUserName)
+         usersSubscrip.unsubscribe();
          done();
+
        });
      }
      catch(error){

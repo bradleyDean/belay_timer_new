@@ -7,7 +7,8 @@ import { UsersService } from '../../services/users.service';
 })
 export class Tab1GuardService implements CanActivate{
 
-  constructor(private uServ: UsersService, private router: Router) {}
+  constructor(private uServ: UsersService, private router: Router) {
+  }
 
   async canActivate(){
 
@@ -16,7 +17,7 @@ export class Tab1GuardService implements CanActivate{
     // //The folowing line is for testing only.
     // await this.uServ.deleteOwnerFile();
     // //*************************************
-    
+
     if(!this.uServ.initialized()){
       await this.uServ.init();
     }

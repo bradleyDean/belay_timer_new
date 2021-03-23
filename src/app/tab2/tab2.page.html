@@ -13,17 +13,35 @@
     </ion-toolbar>
   </ion-header>
 
+  <div *ngIf="!showUpdateOwner">
+    <button (click)="showUpdateOwner = !showUpdateOwner">Change Phone Owner's Name</button>
+  </div>
+
   <div *ngIf="showUpdateOwner">
     <label >Who owns this phone?</label>
       <ion-input  [(ngModel)]="ownerNameFromTemplate"> </ion-input>
-    <button  (click)="updateOwner()">Save</button>
+    <button *ngIf="ownerNameFromTemplate && ownerNameFromTemplate.length > 0" (click)="updateOwner()">Save</button>
+    <button *ngIf="owner" (click)="showUpdateOwner = !showUpdateOwner">Cancel</button>
   </div>
-  <h1>{{ownerNameFromTemplate}}</h1>
+  <h1>Owner: {{ownerNameFromTemplate}}</h1>
+
+  <div *ngIf="!showUsersEditor">
+    <button (click)="showUsersEditor = !showUsersEditor">New Climbing Partner</button>
+  </div>
 
   <div class="" *ngIf="showUsersEditor">
     <label >Enter the name of a new climbing partner:</label>
-      <ion-input  [(ngModel)]="newUser"> </ion-input>
-    <button  (click)="updateNewUser()">Save</button>
+      <ion-input  [(ngModel)]="newUserName"> </ion-input>
+    <button  *ngIf="newUserName != null && newUserName.length > 0" (click)="updateNewUser()">Save</button>
+    <button *ngIf="users && users.length > 0"  (click)="showUsersEditor = !showUsersEditor">Cancel</button>
   </div>
+
+  <div *ngIf="users && users.length > 0">
+    <ion-list>
+      <ion-item *ngFor="let user of users">{{user.name}}</ion-item>
+    </ion-list>
+
+  </div>
+
 
 </ion-content>

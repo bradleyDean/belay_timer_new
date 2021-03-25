@@ -25,6 +25,10 @@
   </div>
   <h1>Owner: {{ownerNameFromTemplate}}</h1>
 
+  <div *ngIf="selectedUser">
+    <h2>Climbing Partner: {{selectedUser.name}}</h2>
+  </div>
+
   <div *ngIf="!showUsersEditor">
     <button (click)="showUsersEditor = !showUsersEditor">New Climbing Partner</button>
   </div>
@@ -50,7 +54,7 @@
 
     TEST TEST!
     <ion-list>
-      <ion-item *ngFor="let user of displayUsers">{{user.name}}</ion-item>
+      <ion-item *ngFor="let user of displayUsers" (click)="selectUser(user)">{{user.name}}</ion-item>
     </ion-list>
 
 

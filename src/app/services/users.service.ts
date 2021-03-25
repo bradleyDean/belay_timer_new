@@ -155,6 +155,35 @@ export class UsersService {
     return this.usersSubject.getValue().length > 0 ? this.usersSubject[0] : null;
   }
 
+  updateSelectedUser(user:UserArrayEntry){
+    //reorder the this.users so that this user appear first.
+    //check that user is actually in the userArray
+
+    const currUsers:UserArrayEntry[] = this.usersSubject.value;
+    console.log("currUsers: ")
+    console.log(currUsers);
+    console.log("user");
+    console.log(user);
+    const i = currUsers.findIndex((u:UserArrayEntry)=>{
+      console.log("checking u,user: " + u.name + ", "+user.name);
+      return u.name == user.name && u.id == user.id;
+    });
+
+    let updatedUsersArray:UserArrayEntry[] = [...currUsers];
+    if (i >= 0){
+      //remove the user from its current position, then put it at the fron of the array
+      updatedUsersArray.splice(i,1);
+      updatedUsersArray.unshift(user);
+
+    }else{
+    console.log('NOT REMOVING NOTHING!');
+      updatedUsersArray.unshift(user);
+    }
+
+    this.selUserSubject.next(user);
+    this.usersSubject.next(updatedUsersArray);
+  }
+
   //This only update's the owner's name. All of the related data are preserved
   // the owner's id is also preserved
   async updateOwner(ownerName:string){
@@ -239,7 +268,7 @@ export class UsersService {
   /*
   *
   * test complete: no
-  */
+  * /
   ownerRecordExists():Promise<boolean>{
     return this.fService.fileOrDirExists(pathMap["owner"]);
   }

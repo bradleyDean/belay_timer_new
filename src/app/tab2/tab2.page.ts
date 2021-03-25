@@ -23,6 +23,7 @@ export class Tab2Page implements OnInit, OnDestroy {
   usersSubscrip: Subscription;
   users: UserArrayEntry[];
 
+  //TODO: some of this is probably no longer being used. Find and remove!
   displayUsersSubject: BehaviorSubject<UserArrayEntry[]>= new BehaviorSubject<UserArrayEntry[]>([]);;
   uServUsers$DisplayUsersSubscription:Subscription;
   displayUsersSubscription: Subscription;
@@ -32,16 +33,15 @@ export class Tab2Page implements OnInit, OnDestroy {
 
   // displayUsersOrderSetting = "alphabetical";//vs "alphabetical"
 
-
   selectedUser:UserArrayEntry;//keep this pointing to the zeroth user in users;
+  selectedUserSubscription:Subscription;
 
   /*
    For next session:
   Start building out the add user template logic.
     [*] Adding users and owner, showing and hiding save/cancel buttons when appropriate
-    //CAUTION: You used users instead of displayUsers. Need to fix that.
     [] Displaying and selecting climbing partner.
-    [] Display modes: alphabetical, vs. last climbed with.
+    [*] Display modes: alphabetical, vs. last climbed with.
   Remember: use the displayUsers array for actually displaying/selecting in the template.
   */
 
@@ -54,7 +54,7 @@ export class Tab2Page implements OnInit, OnDestroy {
 
   displayDuplicateUserNameMessage = false;
 
-  length:any;
+  // length:any;
 
   constructor(private uServ: UsersService, )  {
     // this.length = String.length;
@@ -98,15 +98,20 @@ export class Tab2Page implements OnInit, OnDestroy {
 
     this.uServUsers$DisplayUsersSubscription = this.uServ.users$.subscribe(( users )=>{
       const dispUsers =this.getDisplayUsersFromUsers(users);
-      console.log(" this.uServUsers$DisplayUsersSubscription, setting users to: ")
-      console.log(dispUsers);
+      // console.log(" this.uServUsers$DisplayUsersSubscription, setting users to: ")
+      // console.log(dispUsers);
       this.displayUsersSubject.next(dispUsers);
     });
 
     this.displayUsersSubscription = this.displayUsersSubject.subscribe(( dispUsers )=>{
-      console.log("Setting displayUsers to:");
-      console.log(dispUsers);
+      // console.log("Setting displayUsers to:");
+      // console.log(dispUsers);
       this.displayUsers = dispUsers;
+    });
+
+    this.selectedUserSubscription = this.uServ.selUser$.subscribe(
+      (selUser:UserArrayEntry )=>{
+        this.selectedUser = selUser;
     });
 
 
@@ -142,9 +147,13 @@ export class Tab2Page implements OnInit, OnDestroy {
     }
   }
 
+  selectUser(user:UserArrayEntry){
+    this.uServ.updateSelectedUser(user);
+  }
+
   getDisplayUsersFromUsers(users:UserArrayEntry[]){
     if(this.displayUsersOrderSetting == "most-recent"){
-      console.log("getDisplayUsersFromUsers returning as most-recent mode");
+      // console.log("getDisplayUsersFromUsers returning as most-recent mode");
       return users.slice(); //return a copy of this.users
     }
     if(this.displayUsersOrderSetting == "alphabetical"){
@@ -153,8 +162,8 @@ export class Tab2Page implements OnInit, OnDestroy {
         return u1.name > u2.name ? 1 : -1;
       });
 
-      console.log('getDisplayUsersFromUsers, returning alphabetical: ');
-      console.log(dispUsers);
+      // console.log('getDisplayUsersFromUsers, returning alphabetical: ');
+      // console.log(dispUsers);
 
       return dispUsers;
       // return [...this.users].sort();
@@ -163,13 +172,13 @@ export class Tab2Page implements OnInit, OnDestroy {
 
   toggleDisplayUsersOrderSetting(){
     if(this.displayUsersOrderSetting == "most-recent"){
-      console.log('setting mode to alphabetical');
+      // console.log('setting mode to alphabetical');
       this.displayUsersOrderSetting = "alphabetical";
     }else if(this.displayUsersOrderSetting == "alphabetical"){
-      console.log('setting mode to most-recent');
+      // console.log('setting mode to most-recent');
       this.displayUsersOrderSetting = "most-recent"
     }
-    console.log("toggling alphabetical");
+    // console.log("toggling alphabetical");
     this.displayUsersSubject.next(this.getDisplayUsersFromUsers(this.users));
   }
 

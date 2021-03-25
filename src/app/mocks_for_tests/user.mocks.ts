@@ -17,14 +17,19 @@ export const owner_record_2: UserArrayEntry = {
 export const get_test_user_array = ():UserArrayEntry[] =>{
 
   return [
+    {
+    id: 2,
+    name: "Claire"
+  },
+      {
+    id: 5,
+    name: "Amanda"
+  },
   {
     id: 1,
     name: "Bob"
   },
-  {
-    id: 2,
-    name: "Claire"
-  },
+
   {
     id: 3,
     name: "Dan"
@@ -32,7 +37,24 @@ export const get_test_user_array = ():UserArrayEntry[] =>{
 }
 
 export const test_user_arr = get_test_user_array();
+export const alphabetical_test_user_arr =[
 
+      {
+    id: 5,
+    name: "Amanda"
+  },
+  {
+    id: 1,
+    name: "Bob"
+  },
+      {
+    id: 2,
+    name: "Claire"
+  },
+  {
+    id: 3,
+    name: "Dan"
+  } ];
 const filesService = new FilesService();
 
 export class MockUsersService extends UsersService{

@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 // import { RouterTestingModule } from '@angular/router/testing';
 import {  owner_record, owner_record_2  } from '../mocks_for_tests/user.mocks';
 import { UsersService } from '../services/users.service';
+import {test_user_arr, alphabetical_test_user_arr} from '../mocks_for_tests/user.mocks';
 
 describe('Tab2Page', () => {
   let component: Tab2Page;
@@ -47,7 +48,14 @@ describe('Tab2Page', () => {
          expect(component.newUserName).toBe(null);
          done();
      });
-     
+
+     fit("getDisplayUsersFromUsers should return a sorted list when requested", ( )=>{
+
+        component.displayUsersOrderSetting = "alphabetical";
+        expect(component.getDisplayUsersFromUsers(test_user_arr))
+        .toEqual(alphabetical_test_user_arr);
+     });
+
 // it("if updateNewUser runs succesfully, then selectedUser subscription should recieve\
 //  the newUser that has just been added", async (done:DoneFn)=>{
 //          const updateUsersArraySpy = spyOn(uServ,"updateUsersArray");

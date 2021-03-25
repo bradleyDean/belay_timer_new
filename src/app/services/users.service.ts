@@ -293,7 +293,7 @@ export class UsersService {
   * @remarks:
   * @params:
   */
-  async updateUsersArray(newUserName:string, selected:boolean = false){
+  async updateUsersArray(newUserName:string, selected:boolean = true){
     try{
       if(!this.isUniqueUserName(newUserName)){
         let e = new Error("Duplicate user name.");
@@ -310,6 +310,8 @@ export class UsersService {
         currUsers.push(newUser);
       }
         await this.writeUsersArray(currUsers);
+
+        console.log("updateUsersArray: calling usersSubject.next");
         this.usersSubject.next(currUsers);
 
     }catch(error){

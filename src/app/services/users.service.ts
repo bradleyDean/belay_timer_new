@@ -152,7 +152,7 @@ export class UsersService {
   //Guarantee that this returns null if there is no usersRecord or it is empty
   //The selected user should always be the zeroth item in the usersSubject's current value (or null)
   getCurrentSelUser(){
-    return this.usersSubject.getValue().length > 0 ? this.usersSubject[0] : null;
+    return this.selUserSubject.getValue();
   }
 
   updateSelectedUser(user:UserArrayEntry){
@@ -347,6 +347,25 @@ export class UsersService {
       console.log(error);
       throw error;
     };
+  }
+
+  //no tests for this yet
+  async deleteUser(user:UserArrayEntry){
+    //remove the user from the userArray, then write the current state of the array
+    //to the file system
+    const newUsers = this.usersSubject.getValue().filter(( u:UserArrayEntry )=>{
+      return u.id != user.id;
+    });
+    await this.writeUsersArray(newUsers);
+    this.usersSubject.next(newUsers);
+    //if just deleted selectedUser, emit null for selected user
+    if(user.id === this.selUserSubject.getValue().id){
+      this.selUserSubject.next(null);
+    }
+
+    /***  TODO:  ***/
+    //remove any other data: call appropriate methods in the ledgers service
+    /**************/
   }
 
   /*

@@ -54,7 +54,12 @@
 
     TEST TEST!
     <ion-list>
-      <ion-item *ngFor="let user of displayUsers" (click)="selectUser(user)">{{user.name}}</ion-item>
+      <ion-item *ngFor="let user of displayUsers" (click)="selectUser(user)">
+        {{user.name}}
+        <button ion-button icon-only (click)="beginDeleteUserProcess(user)">
+          <ion-icon name="close-circle-outline"></ion-icon>
+        </button>
+      </ion-item>
     </ion-list>
 
 

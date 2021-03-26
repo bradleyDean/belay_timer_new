@@ -3,7 +3,21 @@ import { UsersService } from '../services/users.service';
 import { Subject, Subscription, BehaviorSubject, Observable } from '../../../node_modules/rxjs';
 import { map } from '../../../node_modules/rxjs/operators';
 import { UserArrayEntry } from '../interfaces/users';
+import { AlertController } from '@ionic/angular';
 
+  /*
+   For next session:
+  Start building out the add user template logic.
+    [*] Adding users and owner, showing and hiding save/cancel buttons when appropriate
+    [*] Displaying and selecting climbing partner.
+    [*] Display modes: alphabetical, vs. last climbed with.
+    [] Deleting/Editing (decide if edit is necessary) users
+       -decide on ux a bit: long-press user then use popup vs a delete icon with pop-up confirmation?
+    [] UX: layout? Styling?
+
+  Then:
+    [] back to tab1: work on stopwatch.
+  */
 
 
 @Component({
@@ -36,14 +50,6 @@ export class Tab2Page implements OnInit, OnDestroy {
   selectedUser:UserArrayEntry;//keep this pointing to the zeroth user in users;
   selectedUserSubscription:Subscription;
 
-  /*
-   For next session:
-  Start building out the add user template logic.
-    [*] Adding users and owner, showing and hiding save/cancel buttons when appropriate
-    [] Displaying and selecting climbing partner.
-    [*] Display modes: alphabetical, vs. last climbed with.
-  Remember: use the displayUsers array for actually displaying/selecting in the template.
-  */
 
   ownerChangeRequested: false;
 
@@ -56,7 +62,7 @@ export class Tab2Page implements OnInit, OnDestroy {
 
   // length:any;
 
-  constructor(private uServ: UsersService, )  {
+  constructor(private uServ: UsersService,private alertController:AlertController )  {
     // this.length = String.length;
   }
 
@@ -181,6 +187,21 @@ export class Tab2Page implements OnInit, OnDestroy {
     // console.log("toggling alphabetical");
     this.displayUsersSubject.next(this.getDisplayUsersFromUsers(this.users));
   }
+
+   async beginDeleteUserProcess(user:UserArrayEntry){
+    const alert = await this.alertController.create({
+      header: `Remove ${user.name}`,
+      message: "TODO: uServ.deleteUser should call ledgerServ.deleteUserData (doesn't exist yet). Do you wish to proceed?",
+      buttons:[{text:"No",role:"cancel" },
+      {text:"Yes!",handler:async ( )=>{
+        //TODO: update deleteUser logic in uServ after ledger service code is written
+        await this.uServ.deleteUser(user);
+        }
+      }],
+
+    });
+    alert.present();
+   }
 
   async updateOwner(){
     //send the new value to the UsersService

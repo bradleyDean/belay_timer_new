@@ -5,6 +5,6 @@ export interface PathAndFileNameMap {
 
 export const pathMap:PathAndFileNameMap = {
   "users": "users.txt",
-  "ledgers": "ledgers.txt",
+  "ledgers": "ledgers", //this is part of a path in the form `ledgers/${uid}`, for some uid
   "owner" : "owner.txt"
 }

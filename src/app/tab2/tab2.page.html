@@ -52,7 +52,6 @@
 
   <div *ngIf="displayUsers && displayUsers.length > 0">
 
-    TEST TEST!
     <ion-list>
       <ion-item *ngFor="let user of displayUsers" (click)="selectUser(user)">
         {{user.name}}

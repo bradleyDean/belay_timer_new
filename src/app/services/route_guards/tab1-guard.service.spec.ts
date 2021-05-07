@@ -24,9 +24,6 @@ describe('Tab1GuardService', () => {
     routerSpy = TestBed.inject(Router) as any;
 
     usersServiceSpy.initialized.and.returnValue(true);
-
-
-
   });
 
   it('should be created', () => {

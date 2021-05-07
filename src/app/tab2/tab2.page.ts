@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { UsersService } from '../services/users.service';
-import { Subject, Subscription, BehaviorSubject, Observable } from '../../../node_modules/rxjs';
-import { map } from '../../../node_modules/rxjs/operators';
+import { Subscription, BehaviorSubject, Observable } from '../../../node_modules/rxjs';
+// import { map } from '../../../node_modules/rxjs/operators';
 import { UserArrayEntry } from '../interfaces/users';
 import { AlertController } from '@ionic/angular';
 
@@ -73,7 +73,7 @@ export class Tab2Page implements OnInit, OnDestroy {
       await this.uServ.init();
     }
 
-        //usServe is now initialized. Is there an owner set up?
+    //usServe is now initialized. Is there an owner set up?
     // console.log(`CHECKING getCurrentOwner and getCurrentOwner returns : `);
     // console.log(this.uServe.getCurrentOwner());
         //subscribe to the user service's owner$
@@ -99,6 +99,7 @@ export class Tab2Page implements OnInit, OnDestroy {
       if(!this.users || this.users && this.users.length == 0){
         this.showUsersEditor;
       }
+
     });
 
 
@@ -139,18 +140,33 @@ export class Tab2Page implements OnInit, OnDestroy {
 
     });
 
-
     //TODO: write tests for this subscription
-
-
-
-
     if(!this.uServ.getCurrentSelUser()){
       //by default, the current selected user is the first user in the usersArray
       //if there is no current selected user, then that array is empty, so
       //show add users template stuff...
       //******* TODO ************
+      this.createCompleteUserSetupAlert();
     }
+  }
+
+  createCompleteUserSetupAlert(){
+      setTimeout(async ()=>{
+      //wait 1 second and check if there is a selected user (again).
+      //if still not available, assume we're not waiting for a promise to resolve
+      if(!this.uServ.getCurrentOwner()){
+        const alert = await this.alertController.create({
+          header: `Complete Users Setup`,
+          message: "You must select someone to climb with before using the belay timer!",
+          buttons:[{text:"Got it!",role:"cancel" } ],
+        });
+
+        //TODO: removing the alert fixes the tests. Also, alert does not present with isolated testing (needs)
+        //tab1 component (fixture?) to create the alert. So, prob should move the alert code to the tab2 page
+        //a service probably should never present an alert, right?
+        alert.present();
+      }
+    },1000);
   }
 
   selectUser(user:UserArrayEntry){
@@ -192,14 +208,16 @@ export class Tab2Page implements OnInit, OnDestroy {
     const alert = await this.alertController.create({
       header: `Remove ${user.name}`,
       message: "TODO: uServ.deleteUser should call ledgerServ.deleteUserData (doesn't exist yet). Do you wish to proceed?",
-      buttons:[{text:"No",role:"cancel" },
-      {text:"Yes!",handler:async ( )=>{
+      buttons:[
+        {text:"No",role:"cancel"},
+        {text:"Yes!",handler:async ( )=>{
         //TODO: update deleteUser logic in uServ after ledger service code is written
         await this.uServ.deleteUser(user);
         }
       }],
 
     });
+
     alert.present();
    }
 

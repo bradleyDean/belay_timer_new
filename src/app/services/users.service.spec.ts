@@ -309,7 +309,7 @@ it('init should initialialize usersSubject and selUserSubject properties when\
     ownerSubcrip.unsubscribe();
   })
 
-  fit('updateUsersArray should trigger usersSubject.next and update the users\
+  it('updateUsersArray should trigger usersSubject.next and update the users\
    record',
   async (done: DoneFn)=>{
      const getCurrentOwnerSpy = spyOn(service, "getCurrentOwner");

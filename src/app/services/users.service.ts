@@ -372,7 +372,7 @@ export class UsersService {
   *
   * test complete: no
   */
-  async deleteUsersFile(){
+  async deleteUsersFile():Promise<Boolean>{
     try{
       const exists = await this.fService.fileOrDirExists(pathMap['users']);
       if(exists){

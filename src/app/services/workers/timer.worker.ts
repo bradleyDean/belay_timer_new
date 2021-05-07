@@ -3,7 +3,9 @@
 /*
 * @remarks: provides reliable stopwatch functionality on seperate thread
 * call Worker.postMessage with the following argument options:
-* "start": create and run timer
+* "start": create and run timer. It will post a message with the elapsed seconds once per second
+* "stop": set secondsElapsed to 0, and stop posting messages
+*
 */
 
 let secondsElapsed = 0;
@@ -13,7 +15,7 @@ let timer: any = null;
 const ctx = self as any;
 
 self.onmessage = ( event:MessageEvent )=>{
-  // console.log(`**** worker recieved message as: ${event.data}`)
+  console.log(`**** worker recieved message as: ${event.data}`)
   if (event.data == "start"){
     if (!timer){
       secondsElapsed = 0;
@@ -21,7 +23,7 @@ self.onmessage = ( event:MessageEvent )=>{
         secondsElapsed += 1;
         // console.log('worker posting message');
         ctx.postMessage(secondsElapsed);
-      }, 1000)  ;
+      }, 1000);
     }
   }else if(event.data == "stop"){ //assume that event.data == "stop"
     console.log("worker got STOP message" );

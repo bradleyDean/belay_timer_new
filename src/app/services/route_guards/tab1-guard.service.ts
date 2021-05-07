@@ -35,13 +35,7 @@ export class Tab1GuardService implements CanActivate{
     if (!currOwner || !currentSelUser){
       this.router.navigate(['/tabs/tab2']);
 
-      const alert = await this.alertController.create({
-        header: `Complete Users Setup`,
-        message: "You must enter a phone owner and select a belay partner before using the belay timer!",
-        buttons:[{text:"Got it!",role:"cancel" } ],
-      });
-      alert.present();
-
+      
       return false;
     }else{
 

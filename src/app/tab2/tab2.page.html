@@ -23,7 +23,8 @@
     <button *ngIf="ownerNameFromTemplate && ownerNameFromTemplate.length > 0" (click)="updateOwner()">Save</button>
     <button *ngIf="owner" (click)="showUpdateOwner = !showUpdateOwner">Cancel</button>
   </div>
-  <h1>Owner: {{ownerNameFromTemplate}}</h1>
+  <h1 *ngIf="!owner">Owner: {{ownerNameFromTemplate}}</h1>
+  <h1 *ngIf="owner">Owner: {{owner.name}}</h1>
 
   <div *ngIf="selectedUser">
     <h2>Climbing Partner: {{selectedUser.name}}</h2>

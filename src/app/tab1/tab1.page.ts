@@ -21,11 +21,12 @@ export class Tab1Page implements OnInit, OnDestroy{
   private ownerSubscrip:Subscription;
   private selUserSubscrip:Subscription;
 
-  public elapsedTime:number = 0;
+  // public currClimberElapsedTime:number = 0;
   public timerServ:TimerService = null; //do not instantiate this until an owner and user is selected
 
   public currBelayer:UserArrayEntry = null;
   public currClimber:UserArrayEntry = null;//run the stopwatch assosiated with currClimber when currClimber is climbing
+
 
   constructor(public uServ: UsersService, public router: Router,
     public alertController:AlertController) {
@@ -84,6 +85,7 @@ export class Tab1Page implements OnInit, OnDestroy{
     });
   }
 
+  //Randomly assign who climbs and belays "first" then set up their stopwatches in timer service
   setDefaultClimberAndBelayer(){
     if(this.owner && this.selUser){
       const arr = [this.owner, this.selUser]
@@ -92,6 +94,17 @@ export class Tab1Page implements OnInit, OnDestroy{
 
       this.currClimber = arr[climberIndex];
       this.currBelayer = arr[belayerIndex];
+
+
+      if(!Object.keys(this.timerServ.stopWatches).includes(this.currClimber.id.toString())){
+        this.timerServ.createStopwatchForUser(this.currClimber.id);
+      }
+
+      if(!Object.keys(this.timerServ.stopWatches).includes(this.currBelayer.id.toString())){
+        this.timerServ.createStopwatchForUser(this.currBelayer.id);
+      }
+
+      // this.currClimberElapsedTime = this.timerServ.stopWatches[this.currClimber.id].getCurrentLocalInterval();
     }
   }
 
@@ -108,11 +121,14 @@ export class Tab1Page implements OnInit, OnDestroy{
     }
 
   }
+
   switchUserAndBelayer(){
     console.log('switching!');
     const temp = this.currClimber;
     this.currClimber = this.currBelayer;
     this.currBelayer = temp;
+
+    // this.currClimberElapsedTime = this.timerServ.stopWatches[this.currClimber.id].getCurrentLocalInterval();
   }
     async confirmSwitchUser(){
         const alert = await this.alertController.create({

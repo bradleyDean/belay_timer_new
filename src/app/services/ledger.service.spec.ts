@@ -5,7 +5,7 @@ import { BelayLedger } from '../interfaces/ledgers';
 
 import { belayLedger_1 } from '../mocks_for_tests/ledger.mocks';
 
-describe('LedgerService: Isolated Test (using mocked file system)', () => {
+fdescribe('LedgerService: Isolated Test (using mocked file system)', () => {
   let service: LedgerService;
   let filesServiceSpy:jasmine.SpyObj<FilesService>;
 

@@ -144,6 +144,29 @@ export class LedgerService {
     };
   }
 
+  async getBelayRecordOfBelayerForClimberOnDate(belayerId:number, date:Date){
+    try{
+      const dateString:string = this.convertDateToDDMMYYYYString(date);
+      const ledger = await this.getLedgerOfUser(belayerId);
+
+      return ledger.belay_records[dateString];
+    }
+    catch(error){
+      return null;
+    };
+  }
+
+  async getTimeBelayerBelayedClimberOnDate(belayerId:number, climberId:number, date:Date):Promise<number>{
+    try{
+      const belayRec = this.getBelayRecordOfBelayerForClimberOnDate(belayerId,date);
+      const time = belayRec[climberId];
+      return time;
+    }
+    catch(error){
+      return null;
+    };
+  }
+
   convertDateToDDMMYYYYString(date:Date):string {
     //this setup is a little weird, but it make convertDateToDDMMYYYYString available
     //in other modules and it makes convertDateToDDMMYYYYString easily mockable in Jasmine with spyOn

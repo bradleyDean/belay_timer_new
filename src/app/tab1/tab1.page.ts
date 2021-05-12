@@ -22,14 +22,16 @@ export class Tab1Page implements OnInit, OnDestroy{
   private selUserSubscrip:Subscription;
 
   // public currClimberElapsedTime:number = 0;
-  public timerServ:TimerService = null; //do not instantiate this until an owner and user is selected
+  // public timerServ:TimerService = null; //do not instantiate this until an owner and user is selected
 
   public currBelayer:UserArrayEntry = null;
   public currClimber:UserArrayEntry = null;//run the stopwatch assosiated with currClimber when currClimber is climbing
 
+  public stopwatchKeyForTemplate:string = null;
+
 
   constructor(public uServ: UsersService, public router: Router,
-    public alertController:AlertController) {
+    public alertController:AlertController, public timerServ:TimerService ) {
     // console.log(`Tab1 Constructor `);
   }
 
@@ -55,12 +57,16 @@ export class Tab1Page implements OnInit, OnDestroy{
         // console.log('In page1, navigating from ownerSubscrip, :');
         // console.log(this.router);
         this.router.navigate(['/tabs/tab2']);
-      }else if(this.selUser && !this.timerServ ){
-        this.timerServ = new TimerService();
       }
+
+      //not sure if this is necessary
+      // else if(this.selUser && !this.timerServ ){
+      //   this.timerServ = new TimerService();
+      // }
 
       if(this.owner && this.selUser){
         this.setDefaultClimberAndBelayer();
+        // console.log("setDefaultClimberAndBelayer");
       }
     });
     //
@@ -75,7 +81,7 @@ export class Tab1Page implements OnInit, OnDestroy{
         // console.log('In page1, navigating from selUser subscrip, :');
         this.router.navigate(['/tabs/tab2']);
       }else if(this.owner && !this.timerServ){
-        this.timerServ = new TimerService();
+        // this.timerServ = new TimerService();
       }
 
       if(this.owner && this.selUser){
@@ -86,7 +92,7 @@ export class Tab1Page implements OnInit, OnDestroy{
   }
 
   //Randomly assign who climbs and belays "first" then set up their stopwatches in timer service
-  setDefaultClimberAndBelayer(){
+  async setDefaultClimberAndBelayer(){
     if(this.owner && this.selUser){
       const arr = [this.owner, this.selUser]
       const climberIndex = Math.floor(Math.random() * arr.length)
@@ -96,15 +102,9 @@ export class Tab1Page implements OnInit, OnDestroy{
       this.currBelayer = arr[belayerIndex];
 
 
-      if(!Object.keys(this.timerServ.stopWatches).includes(this.currClimber.id.toString())){
-        this.timerServ.createStopwatchForUser(this.currClimber.id);
-      }
-
-      if(!Object.keys(this.timerServ.stopWatches).includes(this.currBelayer.id.toString())){
-        this.timerServ.createStopwatchForUser(this.currBelayer.id);
-      }
-
-      // this.currClimberElapsedTime = this.timerServ.stopWatches[this.currClimber.id].getCurrentLocalInterval();
+      //set up timerservice with the desired initial stopwatches
+      this.timerServ.initializeStopwatchesForUserPair(this.currBelayer.id, this.currClimber.id);
+      this.stopwatchKeyForTemplate = this.timerServ.createStopwatchesKey(this.currBelayer.id,this.currClimber.id);
     }
   }
 
@@ -114,10 +114,15 @@ export class Tab1Page implements OnInit, OnDestroy{
   */
   async handleSwitchClick(){
     // if clock is running, show confirmation alert
+
+    console.log('handleSwitchClick, getCurrentLocalInterval:');
+    console.log(this.timerServ.stopWatches[this.stopwatchKeyForTemplate].getCurrentLocalInterval());
     if(this.isClockRunning()){
       await this.confirmSwitchUser();
     }else{
       this.switchUserAndBelayer();
+      // this.stopwatchKeyForTemplate = this.timerServ.createStopwatchesKey(this.currBelayer.id,this.currClimber.id);
+
     }
 
   }
@@ -127,8 +132,9 @@ export class Tab1Page implements OnInit, OnDestroy{
     const temp = this.currClimber;
     this.currClimber = this.currBelayer;
     this.currBelayer = temp;
-
+    this.stopwatchKeyForTemplate = this.timerServ.createStopwatchesKey(this.currBelayer.id,this.currClimber.id);
     // this.currClimberElapsedTime = this.timerServ.stopWatches[this.currClimber.id].getCurrentLocalInterval();
+    console.log("DONE SWITCHING");
   }
     async confirmSwitchUser(){
         const alert = await this.alertController.create({
@@ -157,18 +163,18 @@ export class Tab1Page implements OnInit, OnDestroy{
         alert.present();
 }
 
-startTimer(){
+async startTimer(){
   try{
     if(!this.currClimber){
       throw new Error("startTimer called, but there is no currClimber");
     }else{
       //if TimerService has a stopwatch for this user
       if(!Object.keys(this.timerServ.stopWatches).includes(this.currClimber.id.toString())){
-        this.timerServ.createStopwatchForUser(this.currClimber.id);
+        await this.timerServ.createStopwatchForUserAsync(this.currBelayer.id, this.currClimber.id);
       }
 
       console.log("STARTING TIMER IN Tab1Page");
-      this.timerServ.stopWatches[this.currClimber.id].startLocalWatch();
+      this.timerServ.stopWatches[this.stopwatchKeyForTemplate].startLocalWatch();
 
     }
   }
@@ -182,25 +188,26 @@ pauseTimer(){
   console.log("********** pauseTimer called ************ ");
   if(this.isClockRunning()){
     // console.log("Tab1Page, pauseTimer, about to call pauseLocalWatch");
-    this.timerServ.stopWatches[this.currClimber.id].pauseLocalWatch();
+    this.timerServ.stopWatches[this.stopwatchKeyForTemplate].pauseLocalWatch();
   }
 }
 
 resetTimer(){
   if(this.isClockRunning()){
+    console.log(`isClockRunning: ${this.isClockRunning()}`);
     this.pauseTimer();
   }
-  this.timerServ.stopWatches[this.currClimber.id].resetLocalWatch();
+  this.timerServ.stopWatches[this.stopwatchKeyForTemplate].resetLocalWatch();
 }
 
 //TODO: finish this
 isClockRunning(){
 // console.log("*********** isClockRunning ***********");
 // console.log(Object.keys(this.timerServ.stopWatches).includes(this.currClimber.id.toString()));
-if(Object.keys(this.timerServ.stopWatches).includes(this.currClimber.id.toString())){
+if(Object.keys(this.timerServ.stopWatches).includes(this.stopwatchKeyForTemplate)){
   console.log("RETURNING isPaused from stopWatch");
-    console.log(!this.timerServ.stopWatches[this.currClimber.id].isPaused);
-    return !this.timerServ.stopWatches[this.currClimber.id].isPaused;
+    console.log(!this.timerServ.stopWatches[this.stopwatchKeyForTemplate].isPaused);
+    return !this.timerServ.stopWatches[this.stopwatchKeyForTemplate].isPaused;
   }else{
     //if there is no watch for the current climber in timerServ, then the clock is not running
     return false;

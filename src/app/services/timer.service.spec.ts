@@ -9,7 +9,7 @@ import { UserArrayEntry } from '../interfaces/users';
 import {  owner_record, owner_record_2  } from '../mocks_for_tests/user.mocks';
 
 
-fdescribe('TimerService', () => {
+xdescribe('TimerService', () => {
   let service: TimerService;
   let uServiceSpy:jasmine.SpyObj<UsersService>
 

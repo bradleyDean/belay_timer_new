@@ -19,14 +19,14 @@
     <ion-row> <ion-col size="6" class="ion-text-center"> {{currBelayer.name}} </ion-col> <ion-col size="6"> {{currClimber.name}}</ion-col> </ion-row>
 
     <ion-row> <ion-col size="12" class="ion-text-center">
-      <div *ngIf="!!timerServ.stopWatches[currClimber.id].getCurrentLocalInterval()">
-      <!-- {{currClimberElapsedTime}}  -->
-      Id: {{currClimber.id}}
-      Time: {{timerServ.stopWatches[currClimber.id].getCurrentLocalInterval()}}
-      </div>
-      <div *ngIf="!timerServ.stopWatches[currClimber.id].getCurrentLocalInterval()">
-        00
-      </div>
+        <div *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !!timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
+        {{currClimberElapsedTime}}
+        <!-- Id: {{currClimber.id}} -->
+        Time: {{timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()}}
+        </div>
+        <div *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
+          00
+        </div>
 
     </ion-col> </ion-row>
 

@@ -11,7 +11,7 @@ export class LedgerService {
 
   constructor(private fService: FilesService) {}
 
-  createBelayRecord(partner_id:number, gave:number, recieved:number):BelayRecord{
+  createBelayRecord(partner_id:string, gave:number, recieved:number):BelayRecord{
     if (gave && recieved){
       return {
         "gave":{[partner_id]:gave},
@@ -33,7 +33,7 @@ export class LedgerService {
   * @remarks: this method assumes that ledger.belay_records exists
   */
   updateBelayLedger(ledger:BelayLedger, date:string,
-    partner_id:number, gave:number, recieved:number): BelayLedger{
+    partner_id:string, gave:number, recieved:number): BelayLedger{
 
       if(Object.keys(ledger.belay_records).includes(date)){
         //update the existing BelayRecord for this date
@@ -69,7 +69,7 @@ export class LedgerService {
   * @remarks: note that this method DOES update the record in the FileSystem before
   *           resolving.
   */
-  async createOrUpdateLedgerOfUser(subject_id:number, partner_id:number,
+  async createOrUpdateLedgerOfUser(subject_id:string, partner_id:string,
     gave:number, recieved:number):Promise<BelayLedger>{
 
     const date = this.convertDateToDDMMYYYYString(new Date());
@@ -107,7 +107,7 @@ export class LedgerService {
   }
 
   //[*] tested (isolated and integrated with file system api)
-  async getLedgerOfUser(uid:number):Promise<BelayLedger>{
+  async getLedgerOfUser(uid:string):Promise<BelayLedger>{
     try{
       const ledger_rec = await  this.fService.fileRead(`${pathMap['ledgers']}/${uid}`);
       const ledger = ledger_rec ? ledger_rec : null as BelayLedger;
@@ -119,7 +119,7 @@ export class LedgerService {
     };
   }
 
-  async writeLedgerFileOfUser(uid:number, ledger:BelayLedger){
+  async writeLedgerFileOfUser(uid:string, ledger:BelayLedger){
     try{
       const result = await this.fService.fileWrite(`${pathMap['ledgers']}/${uid}`,ledger,false, true);
       return result;
@@ -144,7 +144,7 @@ export class LedgerService {
     };
   }
 
-  async getBelayRecordOfBelayerForClimberOnDate(belayerId:number, date:Date){
+  async getBelayRecordOfBelayerForClimberOnDate(belayerId:string, date:Date){
     try{
       const dateString:string = this.convertDateToDDMMYYYYString(date);
       const ledger = await this.getLedgerOfUser(belayerId);
@@ -156,7 +156,7 @@ export class LedgerService {
     };
   }
 
-  async getTimeBelayerBelayedClimberOnDate(belayerId:number, climberId:number, date:Date):Promise<number>{
+  async getTimeBelayerBelayedClimberOnDate(belayerId:string, climberId:string, date:Date):Promise<number>{
     try{
       const belayRec = this.getBelayRecordOfBelayerForClimberOnDate(belayerId,date);
       const time = belayRec[climberId];

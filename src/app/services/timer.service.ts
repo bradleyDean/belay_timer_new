@@ -15,7 +15,7 @@ class StopWatch {
   private onMessageCallback:any = null;
   // private timerSubject: BehaviorSubject<number>;
 
-  constructor(public belayerId:number, public climberId, public worker: Worker,
+  constructor(public belayerId:string, public climberId:string, public worker: Worker,
     public timerSubject: BehaviorSubject<number>, public previousElapsedSeconds:number = 0){
     this.belayerId= belayerId;
     this.climberId=climberId;
@@ -65,6 +65,8 @@ class StopWatch {
   resetLocalWatch(){
     this.pauseLocalWatch();
     this.previousElapsedSeconds = 0;
+    console.log(`timerSubject emitting: ${this.previousElapsedSeconds}`);
+    this.timerSubject.next(this.previousElapsedSeconds);
   }
 
   getCurrentLocalInterval(){
@@ -115,7 +117,7 @@ export class TimerService {
     this.timerWorker = new Worker("./workers/timer.worker", { type: `module` } );
     }
 
-    async initializeStopwatchesForUserPair(belayerId:number, climberId:number){
+    async initializeStopwatchesForUserPair(belayerId:string, climberId:string){
       const stopwatchKey_1 = this.createStopwatchesKey(belayerId,climberId);
       const stopwatchKey_2 = this.createStopwatchesKey(climberId,belayerId);
 
@@ -132,7 +134,7 @@ export class TimerService {
   * @remarks: check the stopWatches object for this user's stopwatch. If
   * not available, create it and put it in the stopWatches object.
   */
-  createStopwatchForUser(belayerId:number, climberId:number){
+  createStopwatchForUser(belayerId:string, climberId:string){
     // console.log(`got uid as ${uid}` );
     // console.log(Object.keys(this.stopWatches).indexOf(uid.toString())  );
     const stopWatchesKey = this.createStopwatchesKey(belayerId,climberId);
@@ -155,7 +157,7 @@ export class TimerService {
   * @remarks: check the stopWatches object for this user's stopwatch. If
   * not available, create it and put it in the stopWatches object.
   */
-  async createStopwatchForUserAsync(belayerId:number, climberId:number){
+  async createStopwatchForUserAsync(belayerId:string, climberId:string){
     // console.log(`got uid as ${uid}` );
     // console.log(Object.keys(this.stopWatches).indexOf(uid.toString())  );
 
@@ -185,7 +187,7 @@ export class TimerService {
 
 
 
-  createStopwatchesKey(belayerId:number,climberId:number):string{
+  createStopwatchesKey(belayerId:string,climberId:string):string{
     return belayerId.toString() + "_" + climberId.toString();
   }
 
@@ -202,10 +204,10 @@ export class TimerService {
   //TODO: This is not in use
   //rewrite to take belayerId and climberId, build the stopwatchKey, then call
   //resetLocalWatch on the stopwatch instance
-  stopTimingUser(belayerId,climberId){
+  resetTimer(belayerId:string,climberId:string){
     try{
       const stopwatchKey = this.createStopwatchesKey(belayerId,climberId);
-      this.stopWatches[stopwatchKey].pauseLocalWatch();
+      this.stopWatches[stopwatchKey].resetLocalWatch();
     }
     catch(error){
       throw(error);

@@ -202,7 +202,7 @@ resetTimer(){
   }
 
   // this.timerServ.stopWatches[this.stopwatchKeyForTemplate].resetLocalWatch();
-  this.timerServ.stopTimingUser(this.currBelayer,this.currClimber);
+  this.timerServ.resetTimer(this.currBelayer.id,this.currClimber.id);
 }
 
 //TODO: finish this

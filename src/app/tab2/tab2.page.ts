@@ -169,6 +169,21 @@ export class Tab2Page implements OnInit, OnDestroy {
     },1000);
   }
 
+  async createDuplicateUserAlert(){
+      //wait 1 second and check if there is a selected user (again).
+      //if still not available, assume we're not waiting for a promise to resolve
+        const duplicateUserAlert = await this.alertController.create({
+          header: `Duplicate User Name`,
+          message: "Choose a name that is not in use.",
+          buttons:[{text:"Got it!",role:"cancel" } ],
+        });
+
+        //TODO: removing the alert fixes the tests. Also, alert does not present with isolated testing (needs)
+        //tab1 component (fixture?) to create the alert. So, prob should move the alert code to the tab2 page
+        //a service probably should never present an alert, right?
+        duplicateUserAlert.present();
+  }
+
   selectUser(user:UserArrayEntry){
     this.uServ.updateSelectedUser(user);
   }
@@ -222,10 +237,16 @@ export class Tab2Page implements OnInit, OnDestroy {
    }
 
   async updateOwner(){
-    //send the new value to the UsersService
-    this.uServ.updateOwner(this.ownerNameFromTemplate);
-    //NOTE: the ownerSubscrip hides the owner input stuff on the template when
-    //the updated owner is emitted by owner$
+    try{
+      //send the new value to the UsersService
+      this.uServ.updateOwner(this.ownerNameFromTemplate);
+      //NOTE: the ownerSubscrip hides the owner input stuff on the template when
+      //the updated owner is emitted by owner$
+    }
+    catch(error){
+      this.createDuplicateUserAlert();
+      this.ownerNameFromTemplate = null;
+    };
   }
   /*
   *
@@ -240,7 +261,7 @@ export class Tab2Page implements OnInit, OnDestroy {
     catch(error){
       //if the service threw an error
       if(error.message == "Duplicate user name."){
-        this.displayDuplicateUserNameMessage = true;
+        this.createDuplicateUserAlert();
         this.newUserName = null;
         // throw(error);
       }else{

@@ -22,7 +22,8 @@
         <div *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !!timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
         {{currClimberElapsedTime}}
         <!-- Id: {{currClimber.id}} -->
-        Time: {{timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()}}
+        <!-- Time: {{timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()}} -->
+        Time: {{ timerServ.stopWatches[stopwatchKeyForTemplate].timerSubject | async }}
         </div>
         <div *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
           00

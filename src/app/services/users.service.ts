@@ -184,20 +184,24 @@ export class UsersService {
     this.usersSubject.next(updatedUsersArray);
   }
 
-  //This only update's the owner's name. All of the related data are preserved
-  // the owner's id is also preserved
+  //Future versions of this should not change the owner's id
   async updateOwner(ownerName:string){
     // console.log(`****** users.service, updateOwner triggered :${ "" } `);
     // this.ownerSubject.next({name:"Test Name", id: 3})
     try{
       //get the correct id for the owner
+      if( !this.isUniqueUserName(ownerName)){
+        const e =  new Error("Repeat user name");
+        throw e;
+      }
+
       const currOwner = this.ownerSubject.getValue();
-      let id: number;
+      let id: string;
 
       if(currOwner){
         id = currOwner.id;
       }else{
-        id = await this.generateUserId(ownerName,true);
+        id = await this.generateUserId(ownerName);
       }
       //write the owner record to the database
       const owner:UserArrayEntry = {name:ownerName, id: id };
@@ -208,6 +212,20 @@ export class UsersService {
     catch(error){
       throw error;
     };
+  }
+
+  async userNameIsDuplicate(user_name:string){
+    const owner = await this.getCurrentOwner();
+    if(owner.name === user_name){
+      return true;
+    }
+    const users = await this.getCurrentUsersArray();
+    users.forEach( (u : UserArrayEntry) => {
+      if (u.name === user_name ){
+        return true;
+      }
+    });
+    return false;
   }
 
   /*
@@ -398,20 +416,27 @@ export class UsersService {
   //or making an API call if there is ever a backend to this thing
   //This is a terrible way to generate user Id's. There will be collisions.
   //Replace this with a better system!
-  async generateUserId(user_name:string, isOwner = false){
-    if (isOwner){
-      return 0
-    }else{
-      let curr_users = this.usersSubject.getValue();
-      if(!curr_users){
-        curr_users = await this.readUsersArray();
-      }
-      if(curr_users){
-        return curr_users.length;
-      }else{
-        //there are no users left. The first index will be 1;
-        return 1;
-      }
-    }
+
+  // async generateUserId(user_name:string, isOwner = false){
+  //   if (isOwner){
+  //     return 0
+  //   }else{
+  //     let curr_users = this.usersSubject.getValue();
+  //     if(!curr_users){
+  //       curr_users = await this.readUsersArray();
+  //     }
+  //     if(curr_users){
+  //       return curr_users.length;
+  //     }else{
+  //       //there are no users left. The first index will be 1;
+  //       return 1;
+  //     }
+  //   }
+  // }
+
+  //TODO: When there is a backend, update this with a better system!
+  async generateUserId(user_name):Promise<string>{
+    return user_name
   }
+
 }

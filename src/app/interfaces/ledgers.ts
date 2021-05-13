@@ -9,8 +9,8 @@
 * Belay totals should be aggregated onto the same day. So, date keys should never duplicate days.
 */
 export interface BelayRecord {
-  "gave"?:{[keys:number]:number},
-  "recieved"?:{[keys:number]:number}
+  "gave"?:{[keys:string]:number},
+  "recieved"?:{[keys:string]:number}
 }
 
 export interface BelayRecords {
@@ -18,6 +18,6 @@ export interface BelayRecords {
 }
 
 export interface BelayLedger {
-  subject_id:number,
+  subject_id:string,
   belay_records?:BelayRecords
 }

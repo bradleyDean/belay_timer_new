@@ -37,13 +37,13 @@ class StopWatch {
   startLocalWatch(){
     //there might not be a callback, ready to recieve the messages
     if(!this.worker.onmessage){// pauseLocalWatch sets onmessage to null
-      console.log("setting onMessageCallback")
+      // console.log("setting onMessageCallback")
       this.setOnMessageCallback();
     }
-    console.log("Posting start to worker");
+    // console.log("Posting start to worker");
     this.worker.postMessage("start");
     this.isPaused = false;
-    console.log(`belayerId: ${this.belayerId} ... isPaused: ${this.isPaused}`)
+    // console.log(`belayerId: ${this.belayerId} ... isPaused: ${this.isPaused}`)
   }
 
   /*
@@ -79,11 +79,11 @@ class StopWatch {
       // console.log(`timer.service, onMessageCallback...user: ${this.uid} got time as: ${event.data} seconds.`);
       // console.log(event.data);
       this.localTotalElapsedSeconds = event.data + this.previousElapsedSeconds;
-      console.log(`this.localTotalElapsedSeconds: ${this.localTotalElapsedSeconds}` );
+      // console.log(`this.localTotalElapsedSeconds: ${this.localTotalElapsedSeconds}` );
       this.timerSubject.next(this.localTotalElapsedSeconds);
     }
-    console.log("in setOnMessageCallback and worker is:")
-    console.log(this.worker);
+    // console.log("in setOnMessageCallback and worker is:")
+    // console.log(this.worker);
   }
 
   disableOnMessageCallback(){
@@ -199,12 +199,28 @@ export class TimerService {
     };
   }
 
-  stopTimingUser(uid:number){
+  //TODO: This is not in use
+  //rewrite to take belayerId and climberId, build the stopwatchKey, then call
+  //resetLocalWatch on the stopwatch instance
+  stopTimingUser(belayerId,climberId){
     try{
-      this.stopWatches[uid].pauseLocalWatch();
+      const stopwatchKey = this.createStopwatchesKey(belayerId,climberId);
+      this.stopWatches[stopwatchKey].pauseLocalWatch();
     }
     catch(error){
       throw(error);
+    };
+  }
+
+  /*
+  * @remarks: update or create belayer-climber pair in ledger service for today's date
+  */
+  async saveBelayerTime(stopWatchesKey:string){
+    try{
+      const [belayerId, climberId] = stopWatchesKey.split("_");
+      console.log(`belayerId: ${belayerId}, climberId: ${climberId}`)
+    }
+    catch(error){
     };
   }
 }

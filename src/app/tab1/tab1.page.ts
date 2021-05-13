@@ -5,6 +5,7 @@ import { UsersService } from '../services/users.service';
 import { UserArrayEntry } from '../interfaces/users';
 
 import { TimerService } from '../services/timer.service';
+// import { LedgerService } from '../services/ledger.service';
 
 import { Subscription } from '../../../node_modules/rxjs';
 import { Router  } from '@angular/router';
@@ -31,7 +32,9 @@ export class Tab1Page implements OnInit, OnDestroy{
 
 
   constructor(public uServ: UsersService, public router: Router,
-    public alertController:AlertController, public timerServ:TimerService ) {
+    // public ledgerServ:LedgerService,
+    public alertController:AlertController, public timerServ:TimerService,
+    ) {
     // console.log(`Tab1 Constructor `);
   }
 
@@ -115,18 +118,17 @@ export class Tab1Page implements OnInit, OnDestroy{
   async handleSwitchClick(){
     // if clock is running, show confirmation alert
 
-    console.log('handleSwitchClick, getCurrentLocalInterval:');
-    console.log(this.timerServ.stopWatches[this.stopwatchKeyForTemplate].getCurrentLocalInterval());
+    // console.log('handleSwitchClick, getCurrentLocalInterval:');
+    // console.log(this.timerServ.stopWatches[this.stopwatchKeyForTemplate].getCurrentLocalInterval());
     if(this.isClockRunning()){
       await this.confirmSwitchUser();
     }else{
       this.switchUserAndBelayer();
-      // this.stopwatchKeyForTemplate = this.timerServ.createStopwatchesKey(this.currBelayer.id,this.currClimber.id);
-
     }
 
   }
 
+  //NOTE: only this method should update stopwatchKeyForTemplate
   switchUserAndBelayer(){
     console.log('switching!');
     const temp = this.currClimber;
@@ -136,31 +138,32 @@ export class Tab1Page implements OnInit, OnDestroy{
     // this.currClimberElapsedTime = this.timerServ.stopWatches[this.currClimber.id].getCurrentLocalInterval();
     console.log("DONE SWITCHING");
   }
-    async confirmSwitchUser(){
-        const alert = await this.alertController.create({
-          header: `The belay timer is still running!`,
-          message: "Stop timer and swap beyaer/climber?",
-          buttons:[
-            {
-              text:"Yes",
-              handler: ( )=>{
-                console.log(`TODO: pause timer for ${this.currClimber.name}`);
-                this.pauseTimer();
-                this.switchUserAndBelayer();
-                alert.dismiss();
-              }
-            },
-            {
-              text:"Cancel",
-              role: "cancel"
-            }
-          ],
-        });
 
-        //TODO: removing the alert fixes the tests. Also, alert does not present with isolated testing (needs)
-        //tab1 component (fixture?) to create the alert. So, prob should move the alert code to the tab2 page
-        //a service probably should never present an alert, right?
-        alert.present();
+  async confirmSwitchUser(){
+      const alert = await this.alertController.create({
+        header: `The belay timer is still running!`,
+        message: "Stop timer and swap beyaer/climber?",
+        buttons:[
+          {
+            text:"Yes",
+            handler: ( )=>{
+              console.log(`TODO: pause timer for ${this.currClimber.name}`);
+              this.pauseTimer();
+              this.switchUserAndBelayer();
+              alert.dismiss();
+            }
+          },
+          {
+            text:"Cancel",
+            role: "cancel"
+          }
+        ],
+      });
+
+      //TODO: removing the alert fixes the tests. Also, alert does not present with isolated testing (needs)
+      //tab1 component (fixture?) to create the alert. So, prob should move the alert code to the tab2 page
+      //a service probably should never present an alert, right?
+      alert.present();
 }
 
 async startTimer(){
@@ -168,12 +171,12 @@ async startTimer(){
     if(!this.currClimber){
       throw new Error("startTimer called, but there is no currClimber");
     }else{
-      //if TimerService has a stopwatch for this user
-      if(!Object.keys(this.timerServ.stopWatches).includes(this.currClimber.id.toString())){
+      //if TimerService has a stopwatch for this belayer-user pair
+      if(!Object.keys(this.timerServ.stopWatches).includes(this.stopwatchKeyForTemplate)){
         await this.timerServ.createStopwatchForUserAsync(this.currBelayer.id, this.currClimber.id);
       }
 
-      console.log("STARTING TIMER IN Tab1Page");
+      // console.log("STARTING TIMER IN Tab1Page");
       this.timerServ.stopWatches[this.stopwatchKeyForTemplate].startLocalWatch();
 
     }
@@ -197,7 +200,9 @@ resetTimer(){
     console.log(`isClockRunning: ${this.isClockRunning()}`);
     this.pauseTimer();
   }
-  this.timerServ.stopWatches[this.stopwatchKeyForTemplate].resetLocalWatch();
+
+  // this.timerServ.stopWatches[this.stopwatchKeyForTemplate].resetLocalWatch();
+  this.timerServ.stopTimingUser(this.currBelayer,this.currClimber);
 }
 
 //TODO: finish this
@@ -213,6 +218,12 @@ if(Object.keys(this.timerServ.stopWatches).includes(this.stopwatchKeyForTemplate
     return false;
   }
 }
+
+async saveBelayerTime(){
+ await this.timerServ.saveBelayerTime(this.stopwatchKeyForTemplate);
+}
+
+
   /*
   * @remarks: for each subscription, see if it is truthy, unsubscribe from it then set it to null
   *

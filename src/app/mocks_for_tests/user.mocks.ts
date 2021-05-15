@@ -5,12 +5,12 @@ import { FilesService } from '../services/files.service';
 import { Observable, of } from '../../../node_modules/rxjs';
 
 export const owner_record: UserArrayEntry = {
-    id: 0,
+    id: "Alice",
     name: "Alice"
   }
 
 export const owner_record_2: UserArrayEntry = {
-    id: 3,
+    id: "Bradley",
     name: "Bradley"
   }
 
@@ -18,20 +18,20 @@ export const get_test_user_array = ():UserArrayEntry[] =>{
 
   return [
     {
-    id: 2,
+    id: "Claire",
     name: "Claire"
   },
       {
-    id: 5,
+    id: "Amanda",
     name: "Amanda"
   },
   {
-    id: 1,
+    id: "Bob",
     name: "Bob"
   },
 
   {
-    id: 3,
+    id: "Dan",
     name: "Dan"
   } ]
 }
@@ -40,19 +40,19 @@ export const test_user_arr = get_test_user_array();
 export const alphabetical_test_user_arr =[
 
       {
-    id: 5,
+    id: "Amanda",
     name: "Amanda"
   },
   {
-    id: 1,
+    id: "Bob",
     name: "Bob"
   },
       {
-    id: 2,
+    id: "Claire",
     name: "Claire"
   },
   {
-    id: 3,
+    id: "Dan",
     name: "Dan"
   } ];
 const filesService = new FilesService();

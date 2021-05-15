@@ -69,8 +69,17 @@ class StopWatch {
     this.timerSubject.next(this.previousElapsedSeconds);
   }
 
+  resetLocalWatchAndWipeElapsedTotal(){
+    this.localTotalElapsedSeconds = 0;
+    this.resetLocalWatch();
+  }
+
   getCurrentLocalInterval(){
     return this.localTotalElapsedSeconds;
+  }
+
+  triggertimerSubjectNext(){
+    this.timerSubject.next(this.previousElapsedSeconds);
   }
 
   //set or disable the onMessageCallback to make sure this user's local stopWatch
@@ -187,8 +196,16 @@ export class TimerService {
 
 
 
-  createStopwatchesKey(belayerId:string,climberId:string):string{
-    return belayerId.toString() + "_" + climberId.toString();
+  createStopwatchesKey(belayerId:string,climberId:string, triggerTimerSubjectNext = false):string{
+    const stopWatchesKey =  belayerId.toString() + "_" + climberId.toString();
+
+    if(this.stopWatches && Object.keys(this.stopWatches).includes(stopWatchesKey)
+      && triggerTimerSubjectNext ){
+      // console.log("A");
+      this.stopWatches[stopWatchesKey].triggertimerSubjectNext();
+
+    }
+    return stopWatchesKey;
   }
 
   startTimingUser(belayerId,climberId){
@@ -217,12 +234,53 @@ export class TimerService {
   /*
   * @remarks: update or create belayer-climber pair in ledger service for today's date
   */
-  async saveBelayerTime(stopWatchesKey:string){
+  async saveOrUpdateBelayerTime(stopWatchesKey:string){
     try{
       const [belayerId, climberId] = stopWatchesKey.split("_");
       console.log(`belayerId: ${belayerId}, climberId: ${climberId}`)
+
+
+      let gave:number;
+      if(Object.keys(this.stopWatches).includes(stopWatchesKey)){
+        gave = this.stopWatches[stopWatchesKey].getCurrentLocalInterval();
+      }else{
+        gave = 0;
+      }
+
+      const otherKey = this.createStopwatchesKey(climberId,belayerId);
+      let recieved:number;
+      if(Object.keys(this.stopWatches).includes(otherKey)){
+        recieved = this.stopWatches[otherKey].getCurrentLocalInterval();
+      }else{
+        recieved = 0;
+      }
+
+      console.log(`gave: ${gave}, recieved: ${recieved}`)
+      await this.ledgerServ.createOrUpdateLedgerOfUser(belayerId,climberId,gave,recieved);
+      await this.ledgerServ.createOrUpdateLedgerOfUser(climberId,belayerId,recieved,gave)
+
+      await this.testSaveTimes(belayerId);
+
+      if(Object.keys(this.stopWatches).includes(stopWatchesKey)){
+        this.stopWatches[stopWatchesKey].resetLocalWatchAndWipeElapsedTotal();
+      }
+
+      if(Object.keys(this.stopWatches).includes(otherKey)){
+        this.stopWatches[otherKey].resetLocalWatchAndWipeElapsedTotal();
+      }
+
     }
     catch(error){
     };
   }
+
+  async testSaveTimes(belayerId){
+
+    const belayerRecord = await this.ledgerServ.getBelayRecordOfBelayerForClimberOnDate(belayerId, new Date());
+    console.log(`belyerRecord for ${belayerRecord}`);
+    console.log(belayerRecord)    ;
+    // const climberRecord = await this.ledgerServ.getBelayRecordOfBelayerForClimberOnDate(climberId, new Date());
+
+  }
+
 }

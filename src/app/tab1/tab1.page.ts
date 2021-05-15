@@ -125,7 +125,6 @@ export class Tab1Page implements OnInit, OnDestroy{
     }else{
       this.switchUserAndBelayer();
     }
-
   }
 
   //NOTE: only this method should update stopwatchKeyForTemplate
@@ -134,7 +133,9 @@ export class Tab1Page implements OnInit, OnDestroy{
     const temp = this.currClimber;
     this.currClimber = this.currBelayer;
     this.currBelayer = temp;
-    this.stopwatchKeyForTemplate = this.timerServ.createStopwatchesKey(this.currBelayer.id,this.currClimber.id);
+    this.stopwatchKeyForTemplate = this.timerServ.
+                createStopwatchesKey(this.currBelayer.id,this.currClimber.id,true); //pass true, so triggers next time
+
     // this.currClimberElapsedTime = this.timerServ.stopWatches[this.currClimber.id].getCurrentLocalInterval();
     console.log("DONE SWITCHING");
   }
@@ -219,8 +220,8 @@ if(Object.keys(this.timerServ.stopWatches).includes(this.stopwatchKeyForTemplate
   }
 }
 
-async saveBelayerTime(){
- await this.timerServ.saveBelayerTime(this.stopwatchKeyForTemplate);
+async saveTimes(){
+ await this.timerServ.saveOrUpdateBelayerTime(this.stopwatchKeyForTemplate);
 }
 
 

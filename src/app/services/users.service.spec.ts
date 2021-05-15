@@ -9,21 +9,21 @@ import { UserArrayEntry } from '../interfaces/users';
 const get_test_user_array = ():UserArrayEntry[] =>{
   return [
   {
-    id: 1,
+    id: "B",
     name: "Bob"
   },
   {
-    id: 2,
+    id: "C",
     name: "Claire"
   },
   {
-    id: 3,
+    id: "D",
     name: "Dan"
   } ]
 }
 
 const owner_record: UserArrayEntry = {
-    id: 0,
+    id: "A",
     name: "Alice"
   }
 

@@ -21,23 +21,23 @@ const date_6 = convertDateToDDMMYYYYString(date);
 
 
 export const belayLedger_1:BelayLedger = {
-  subject_id:1,
+  subject_id:"A",
   belay_records:{
     [date_1]:{
       gave:{
-        2: 33,
-        4: 126,
-        9: 325
+        "B": 33,
+        "C": 126,
+        "D": 325
       },
-      recieved:{2:25, 4: 130, 9: 300}
+      recieved:{"B":25, "C": 130, "D": 300}
     },
     [date_2]:{
-      gave:{2:57},
-      recieved:{2:64}
+      gave:{"B":57},
+      recieved:{"B":64}
     },
     [date_3]:{
-      gave:{4:126},
-      recieved:{4:175}
+      gave:{"C":126},
+      recieved:{"C":175}
     }
   }
 
@@ -45,7 +45,7 @@ export const belayLedger_1:BelayLedger = {
 
 
 export const empty_belay_ledger:BelayLedger = {
-  subject_id:2,
+  subject_id:"B",
   belay_records:{
     [date_4]:{
       gave:{},

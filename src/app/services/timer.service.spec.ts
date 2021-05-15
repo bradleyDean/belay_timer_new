@@ -41,18 +41,21 @@ xdescribe('TimerService', () => {
   });
 
   it('createStopwatchForUser should create a stopwatch for both users', () => {
-    service.createStopwatchForUser(owner_record.id);
-    service.createStopwatchForUser(owner_record_2.id);
+    service.createStopwatchForUser(owner_record.id, owner_record_2.id);
+    service.createStopwatchForUser(owner_record_2.id, owner_record.id);
 
-    expect(service.stopWatches[owner_record.id]).toBeTruthy();
-    expect(service.stopWatches[owner_record_2.id]).toBeTruthy();
+    const key_1_2 = service.createStopwatchesKey(owner_record.id,owner_record_2.id);
+    const key_2_1 = service.createStopwatchesKey(owner_record.id,owner_record_2.id);
 
-    expect(service.stopWatches[owner_record.id].uid).toEqual(owner_record.id);
-    expect(service.stopWatches[owner_record_2.id].uid).toEqual(owner_record_2.id);
+    expect(service.stopWatches[key_1_2]).toBeTruthy();
+    expect(service.stopWatches[key_2_1]).toBeTruthy();
+
+    expect(service.stopWatches[key_1_2].belayerId).toEqual(owner_record.id);
+    expect(service.stopWatches[key_2_1].belayerId).toEqual(owner_record_2.id);
   });
 
   it('createStopwatchForUser should start the stopwatch for a user', async (done:DoneFn) => {
-    service.createStopwatchForUser(owner_record.id);
+    service.createStopwatchForUser(owner_record.id, owner_record_2.id);
     service.stopWatches[owner_record.id].startLocalWatch();
     let secondsElapsed = 0;
 

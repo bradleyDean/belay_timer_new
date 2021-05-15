@@ -150,7 +150,8 @@ export class Tab2Page implements OnInit, OnDestroy {
     }
   }
 
-  createCompleteUserSetupAlert(){
+  createCompleteUserSetupAlert()  {
+    console.log("Real createCompleteUserSetupAlert called!");
       setTimeout(async ()=>{
       //wait 1 second and check if there is a selected user (again).
       //if still not available, assume we're not waiting for a promise to resolve
@@ -245,6 +246,7 @@ export class Tab2Page implements OnInit, OnDestroy {
     }
     catch(error){
       this.createDuplicateUserAlert();
+      // this.createCompleteUserSetupAlert();
       this.ownerNameFromTemplate = null;
     };
   }

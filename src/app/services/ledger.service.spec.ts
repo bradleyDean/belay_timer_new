@@ -5,7 +5,7 @@ import { BelayLedger } from '../interfaces/ledgers';
 
 import { belayLedger_1 } from '../mocks_for_tests/ledger.mocks';
 
-fdescribe('LedgerService: Isolated Test (using mocked file system)', () => {
+describe('LedgerService: Isolated Test (using mocked file system)', () => {
   let service: LedgerService;
   let filesServiceSpy:jasmine.SpyObj<FilesService>;
 
@@ -44,15 +44,15 @@ fdescribe('LedgerService: Isolated Test (using mocked file system)', () => {
     const date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
-      subject_id:77,
+      subject_id: "A",
 
       belay_records:{
         [date]:{
           gave:{
-            2: 7,
-            4: 30,
+            "B": 7,
+            "F": 30,
           },
-          recieved:{2:5, 9: 300}
+          recieved:{"B":5, "C": 300}
         }
       }
     }
@@ -67,11 +67,11 @@ fdescribe('LedgerService: Isolated Test (using mocked file system)', () => {
     writeLedgerFileOfUserSpy.and.callThrough();
 
     const updatedLedger = await service.createOrUpdateLedgerOfUser(belayLedger["subject_id"],
-                                                             2,10,20);
+                                                             "B",10,20);
 
     let expected_new_ledger = JSON.parse(JSON.stringify(belayLedger)); //make deep copy
-    expected_new_ledger.belay_records[date].gave[2] = 7 + 10;
-    expected_new_ledger.belay_records[date].recieved[2] = 5 + 20;
+    expected_new_ledger.belay_records[date].gave["B"] = 7 + 10;
+    expected_new_ledger.belay_records[date].recieved["B"] = 5 + 20;
 
     expect(updatedLedger).toEqual(expected_new_ledger);
     expect(writeLedgerFileOfUserSpy).toHaveBeenCalledTimes(1);
@@ -83,14 +83,14 @@ fdescribe('LedgerService: Isolated Test (using mocked file system)', () => {
     const date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
-      subject_id:99,
+      subject_id:"P",
 
       belay_records:{
         [date]:{
           gave:{
-            2: 7
+            "B": 7
           },
-          recieved:{2:5}
+          recieved:{"B":5}
         }
       }
     }
@@ -105,11 +105,11 @@ fdescribe('LedgerService: Isolated Test (using mocked file system)', () => {
     writeLedgerFileOfUserSpy.and.callThrough();
 
     const updatedLedger = await service.createOrUpdateLedgerOfUser(belayLedger["subject_id"],
-                                                             2,7,5);
+                                                             "B",7,5);
 
     let expected_new_ledger = JSON.parse(JSON.stringify(belayLedger)); //make deep copy
-    expected_new_ledger.belay_records[date].gave[2] = 7;
-    expected_new_ledger.belay_records[date].recieved[2] = 5;
+    expected_new_ledger.belay_records[date].gave["B"] = 7;
+    expected_new_ledger.belay_records[date].recieved["B"] = 5;
 
 
     expect(updatedLedger).toEqual(expected_new_ledger);
@@ -125,19 +125,19 @@ fdescribe('LedgerService: Isolated Test (using mocked file system)', () => {
     const existing_date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
-      subject_id:99,
+      subject_id:"P",
 
       belay_records:{
         [existing_date]:{
           gave:{
-            2: 7
+            "B": 7
           },
-          recieved:{2:5}
+          recieved:{"B":5}
         }
       }
     }
     //arguments for calling createOrUpdateLedgerOfUser
-    const partner_id = 2;
+    const partner_id = "B";
     const gave = 11;
     const recieved = 17;
     const novel_date = convertDateToDDMMYYYYString(new Date(1944,9,29));
@@ -168,15 +168,15 @@ fdescribe('LedgerService: Isolated Test (using mocked file system)', () => {
    BelayRecord when Ǝ ledger and Ǝ no "belay_records" property in the ledger.',
     async (done:DoneFn)=>{
 
-    // const existing_date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
+    // const existing_dat = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
-      subject_id:99,
+      subject_id:"P",
 
     }
 
     //arguments for calling createOrUpdateLedgerOfUser
-    const partner_id = 2;
+    const partner_id = "B";
     const gave = 11;
     const recieved = 17;
     const novel_date = convertDateToDDMMYYYYString(new Date(1944,9,29));

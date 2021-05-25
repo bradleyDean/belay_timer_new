@@ -166,8 +166,7 @@ export class LedgerService {
       const time = belayRec[climberId];
       return time;
     }
-    catch(error){
-      
+    catch(error){  
       return null;
     };
   }

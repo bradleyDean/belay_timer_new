@@ -163,6 +163,7 @@ export class LedgerService {
       return time;
     }
     catch(error){
+      
       return null;
     };
   }

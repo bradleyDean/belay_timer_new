@@ -254,7 +254,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
     ).toBeRejectedWith( new Error("argument error: startDate > endDate") );
   })
 
-  fit("getBelayTimeSummaryForPartnersInDateRange should do what its name implies it does",
+  it("getBelayTimeSummaryForPartnersInDateRange should do what its name implies it does",
   async ( done:DoneFn  )=>{
     const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
     getLedgerOfUserSpy.and.resolveTo(belay_ledger_6_dates);

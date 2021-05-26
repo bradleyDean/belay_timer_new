@@ -166,12 +166,9 @@ export class LedgerService {
       const time = belayRec[climberId];
       return time;
     }
-<<<<<<< HEAD
     catch(error){
-      
-=======
-    catch(error){  
->>>>>>> brad_dev
+
+
       return null;
     };
   }

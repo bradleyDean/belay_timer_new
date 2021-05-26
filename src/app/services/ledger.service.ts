@@ -68,6 +68,10 @@ export class LedgerService {
   /*
   * @remarks: note that this method DOES update the record in the FileSystem before
   *           resolving.
+  * @params: subject_id->uid of user whose ledger file is being read (contains all of their data)
+  *          partner_id->uid of user who is the subject's climbing partner for some climbing session
+  *          gave-> subject_id "gave" partner_id this much belay time in SECONDS
+  *          recieved -> subject_id "recieved" this much belay time in SECONDS
   */
   async createOrUpdateLedgerOfUser(subject_id:string, partner_id:string,
     gave:number, recieved:number):Promise<BelayLedger>{
@@ -162,11 +166,89 @@ export class LedgerService {
       const time = belayRec[climberId];
       return time;
     }
+<<<<<<< HEAD
     catch(error){
       
+=======
+    catch(error){  
+>>>>>>> brad_dev
       return null;
     };
   }
+
+  async getAllBelayerRecordsOfBelayerInDateRange(belayerId:string, startDate:Date,
+    endDate:Date):Promise<BelayRecord[]>{
+      //"forget" time of day and collapse argument dates to same date if happened on same day.
+      const startDateString = this.convertDateToDDMMYYYYString(startDate);
+      const endDateString = this.convertDateToDDMMYYYYString(endDate);
+
+      startDate = new Date(startDateString);
+      endDate = new Date(endDateString);
+      //...done "forgetting" time of day
+
+      try{
+        if(startDate > endDate){ //compare date objects (not strings) because complicated!
+          throw new Error("argument error: startDate > endDate");
+        }
+
+        const ledger = await this.getLedgerOfUser(belayerId);
+        console.log("Got ledger:");
+        console.log(ledger);
+        const targetBelayRecords:BelayRecord[] = [];
+
+        if( ! ("belay_records" in ledger)){
+          return []
+        }
+        for (let dateString of Object.keys(ledger.belay_records)){
+
+          // console.log("******************");
+          // console.log(dateString);
+          const dateKey:Date = new Date(dateString);
+          // console.log("Checking dateKey:");
+          // console.log(dateKey);
+          // console.log("******************");
+
+          if(startDate <= dateKey && dateKey <= endDate ){
+            targetBelayRecords.push(ledger.belay_records[dateString]);
+          }
+        }
+
+        return targetBelayRecords;
+      }
+      catch(error){
+        console.log(error);
+        throw error;
+      };
+}
+
+/*
+* @remarks:
+*
+* @params:
+*/
+async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:string, startDate:Date,
+    endDate:Date):Promise<{"1_gave_2":number,"2_gave_1":number}>{
+
+  const allBelayRecords:BelayRecord[] =
+    await this.getAllBelayerRecordsOfBelayerInDateRange(partner1_id, startDate,endDate);
+
+    const totals = {
+      "1_gave_2": 0,
+      "2_gave_1": 0
+    };
+
+    allBelayRecords.forEach(( record:BelayRecord )=>{
+      if("gave" in record && partner2_id in record.gave){
+        totals["1_gave_2"] += record.gave[partner2_id];
+      }
+      if("recieved" in record && partner1_id in record.recieved){
+        totals["2_gave_1"] += record.recieved[partner1_id];
+      }
+    });
+
+    return totals;
+  }
+
 
   convertDateToDDMMYYYYString(date:Date):string {
     //this setup is a little weird, but it make convertDateToDDMMYYYYString available
@@ -176,6 +258,18 @@ export class LedgerService {
 
 }
 
+//TODO: this function no longer does what its title implies it does.
+//refactor with better name and/or switch to more effecient string format .
+//...using date.toString because it can easily be translated back into a date object
 export function convertDateToDDMMYYYYString(date:Date):string{
-  return date.getDay() + "/" +date.getMonth() + "/" + date.getFullYear();
+  // const dateStr = date.getDay() + "/" +date.getMonth() + "/" + date.getFullYear();
+  // const dateStr = date.getMonth() + "/" + date.getDay() + "/" + date.getFullYear();
+  date.setHours(0,0,0,0);
+  const dateStr = date.toString();
+  // console.log("&&&&&&&&&&&&&&&&&&");
+  // console.log(date);
+  // console.log(dateStr);
+  // console.log(new Date(dateStr));
+  // console.log("&&&&&&&&&&&&&&&&&&");
+  return dateStr;
 }

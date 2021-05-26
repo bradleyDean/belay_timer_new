@@ -23,6 +23,8 @@ npm-debug.log*
 /.sourcemaps
 /.versions
 /.vscode
+/.tags
+/.tags_swap
 /coverage
 /dist
 /node_modules

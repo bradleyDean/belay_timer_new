@@ -166,7 +166,7 @@ export class LedgerService {
       const time = belayRec[climberId];
       return time;
     }
-    catch(error){  
+    catch(error){
       return null;
     };
   }
@@ -222,33 +222,39 @@ export class LedgerService {
 * @params:
 */
 async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:string, startDate:Date,
-    endDate:Date):Promise<{"1_gave_2":number,"2_gave_1":number}>{
+    endDate:Date):Promise<{ [key:string]:number }>{
 
   const allBelayRecords:BelayRecord[] =
     await this.getAllBelayerRecordsOfBelayerInDateRange(partner1_id, startDate,endDate);
+    const key12 = this.getBelayTimeSummaryKey(partner1_id,partner2_id);
+    const key21 = this.getBelayTimeSummaryKey(partner2_id,partner1_id);
 
     const totals = {
-      "1_gave_2": 0,
-      "2_gave_1": 0
+      [key12]: 0,
+      [key21]: 0
     };
 
     allBelayRecords.forEach(( record:BelayRecord )=>{
       if("gave" in record && partner2_id in record.gave){
-        totals["1_gave_2"] += record.gave[partner2_id];
+        totals[key12] += record.gave[partner2_id];
       }
       if("recieved" in record && partner1_id in record.recieved){
-        totals["2_gave_1"] += record.recieved[partner1_id];
+        totals[key21] += record.recieved[partner1_id];
       }
     });
 
     return totals;
   }
 
+  getBelayTimeSummaryKey(gaveId:string, recievedId:string):string{
+    return `${gaveId}_gave_${recievedId}`
+  }
+
 
   convertDateToDDMMYYYYString(date:Date):string {
-    //this setup is a little weird, but it make convertDateToDDMMYYYYString available
+    //this setup is a little weird, but it make convertDateToDDMMYYYYString_ available
     //in other modules and it makes convertDateToDDMMYYYYString easily mockable in Jasmine with spyOn
-    return convertDateToDDMMYYYYString(date);
+    return convertDateToDDMMYYYYString_(date);
   }
 
 }
@@ -256,15 +262,10 @@ async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:
 //TODO: this function no longer does what its title implies it does.
 //refactor with better name and/or switch to more effecient string format .
 //...using date.toString because it can easily be translated back into a date object
-export function convertDateToDDMMYYYYString(date:Date):string{
+export function convertDateToDDMMYYYYString_(date:Date):string{
   // const dateStr = date.getDay() + "/" +date.getMonth() + "/" + date.getFullYear();
   // const dateStr = date.getMonth() + "/" + date.getDay() + "/" + date.getFullYear();
   date.setHours(0,0,0,0);
   const dateStr = date.toString();
-  // console.log("&&&&&&&&&&&&&&&&&&");
-  // console.log(date);
-  // console.log(dateStr);
-  // console.log(new Date(dateStr));
-  // console.log("&&&&&&&&&&&&&&&&&&");
   return dateStr;
 }

@@ -1,5 +1,5 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import { LedgerService,convertDateToDDMMYYYYString } from './ledger.service';
+import { LedgerService,convertDateToDDMMYYYYString_ } from './ledger.service';
 import { FilesService } from './files.service';
 import { BelayLedger } from '../interfaces/ledgers';
 
@@ -42,7 +42,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
     for the appropriate dates ,when ledger already exists',
     async (done:DoneFn)=>{
 
-    const date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
+    const date = convertDateToDDMMYYYYString_(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
       subject_id: "A",
@@ -81,7 +81,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
 
   it('createOrUpdateLedgerOfUser should create a new ledger, when when ledger does not exist', async (done:DoneFn)=>{
 
-    const date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
+    const date = convertDateToDDMMYYYYString_(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
       subject_id:"P",
@@ -123,7 +123,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
    BelayLedger when Ǝ ledger and date for this input date is\
     not already in the belay record', async (done:DoneFn)=>{
 
-    const existing_date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
+    const existing_date = convertDateToDDMMYYYYString_(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
       subject_id:"P",
@@ -141,7 +141,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
     const partner_id = "B";
     const gave = 11;
     const recieved = 17;
-    const novel_date = convertDateToDDMMYYYYString(new Date(1944,9,29));
+    const novel_date:string = convertDateToDDMMYYYYString_(new Date(1944,9,29));
 
     const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
     const writeLedgerFileOfUserSpy = spyOn(service, "writeLedgerFileOfUser");
@@ -180,7 +180,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
     const partner_id = "B";
     const gave = 11;
     const recieved = 17;
-    const novel_date = convertDateToDDMMYYYYString(new Date(1944,9,29));
+    const novel_date = convertDateToDDMMYYYYString_(new Date(1944,9,29));
 
     const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
     const writeLedgerFileOfUserSpy = spyOn(service, "writeLedgerFileOfUser");
@@ -266,12 +266,11 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
   const summary = await service.
   getBelayTimeSummaryForPartnersInDateRange("A","B",startDate,endDate);
 
-  //summary["1_gave_2"] == 100, summary["2_gave_1"] == 15
 
   expect(summary).toEqual(
     {
-      "1_gave_2":100,
-      "2_gave_1":15 }
+      "A_gave_B":100,
+      "B_gave_A":15 }
     );
   done();
 });

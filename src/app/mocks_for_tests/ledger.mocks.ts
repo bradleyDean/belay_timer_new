@@ -1,23 +1,23 @@
 import { BelayLedger  } from '../interfaces/ledgers';
-import {convertDateToDDMMYYYYString} from '../services/ledger.service';
+import {convertDateToDDMMYYYYString_} from '../services/ledger.service';
 
 let date = new Date(2019, 7, 28);
-export const date_1 = convertDateToDDMMYYYYString(date);
+export const date_1 = convertDateToDDMMYYYYString_(date);
 
 date = new Date(2019, 8, 3);
-export const date_2 = convertDateToDDMMYYYYString(date);
+export const date_2 = convertDateToDDMMYYYYString_(date);
 
 date = new Date(2020, 5, 14);
-export const date_3 = convertDateToDDMMYYYYString(date);
+export const date_3 = convertDateToDDMMYYYYString_(date);
 
 date = new Date(2020, 6, 1);
-export const date_4 = convertDateToDDMMYYYYString(date);
+export const date_4 = convertDateToDDMMYYYYString_(date);
 
 date = new Date(2020, 11, 16);
-export const date_5 = convertDateToDDMMYYYYString(date);
+export const date_5 = convertDateToDDMMYYYYString_(date);
 
 date = new Date(2021, 3, 29);
-export const date_6 = convertDateToDDMMYYYYString(date);
+export const date_6 = convertDateToDDMMYYYYString_(date);
 
 
 export const belayLedger_1:BelayLedger = {

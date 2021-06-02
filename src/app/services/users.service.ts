@@ -56,7 +56,9 @@ export class UsersService {
   }
   async init(){
 
-    // await this.resetForTesting();
+    //delete this eventually. Only here for testing.
+    //await this.resetForTesting();
+    //////////////////////////////////
 
      //ownerSubject and usersSubject were initialized with default stream item = null
     if (this.ownerSubject.getValue() && this.usersSubject.getValue().length > 0){

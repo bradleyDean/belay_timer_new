@@ -10,7 +10,10 @@ import { Tab3Page } from './tab3.page';
 import { MatDatepickerModule, } from '@angular/material/datepicker';
 import {  MatNativeDateModule,} from '@angular/material/core';
 import {   MatInputModule } from '@angular/material/input';
-import { DoughnutChartComponent } from '../doughnut-chart/doughnut-chart.component';
+// import { DoughnutChartComponent } from '../doughnut-chart/doughnut-chart.component';
+import { DoughnutChartModule } from '../doughnut-chart/doughnut-chart.module';
+
+// import { ChartsModule } from 'ng2-charts';
 
 
 import { Tab3PageRoutingModule } from './tab3-routing.module';
@@ -22,17 +25,19 @@ import { Tab3PageRoutingModule } from './tab3-routing.module';
     FormsModule,
     RouterModule.forChild([{ path: '', component: Tab3Page }]),
     Tab3PageRoutingModule,
+    // DoughnutChartComponent
 
-    // DoughnutChartComponent,
+    DoughnutChartModule,
 
     MatDatepickerModule,
     MatNativeDateModule,
     MatInputModule,
 
+
   ],
   declarations: [
     Tab3Page,
-    DoughnutChartComponent
+    // DoughnutChartComponent,
    ]
 })
 export class Tab3PageModule {}

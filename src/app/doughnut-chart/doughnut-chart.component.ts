@@ -7,6 +7,10 @@ import {   MatInputModule } from '@angular/material/input';
 import { LedgerService } from '../services/ledger.service';
 import { UserArrayEntry } from '../interfaces/users';
 
+import { ChartType } from 'chart.js';
+import { MultiDataSet, Label } from 'ng2-charts';
+
+
 @Component({
   selector: 'app-doughnut-chart',
   templateUrl: './doughnut-chart.component.html',
@@ -15,7 +19,14 @@ import { UserArrayEntry } from '../interfaces/users';
 export class DoughnutChartComponent implements OnInit {
   @Input() partners: UserArrayEntry[];
 
-  constructor(public LedgerServ:LedgerService, ) { }
+  public doughnutChartLabels: Label[] = ['BMW', 'Ford', 'Tesla'];
+  public doughnutChartData: MultiDataSet = [
+    [55, 25, 20]
+  ];
+  public doughnutChartType: ChartType = 'doughnut';
+
+  constructor(public LedgerServ:LedgerService, ) {
+  }
 
   ngOnInit(){
 

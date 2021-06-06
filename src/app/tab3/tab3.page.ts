@@ -5,6 +5,10 @@ import { UsersService } from '../services/users.service';
 import { UserArrayEntry } from '../interfaces/users';
 import { Subscription } from '../../../node_modules/rxjs';
 
+import { MultiDataSet, Label } from 'ng2-charts';
+
+import { ChartType } from 'chart.js';
+
 @Component({
   selector: 'app-tab3',
   templateUrl: 'tab3.page.html',
@@ -15,6 +19,12 @@ export class Tab3Page implements OnInit {
   private selUserSubscrip:Subscription;
 
   partners: UserArrayEntry[] = [null,null];
+
+  public doughnutChartLabels: Label[] = ['Elio', 'Ford', 'Tesla'];
+  public doughnutChartData: MultiDataSet = [
+    [55, 25, 20]
+  ];
+  public doughnutChartType: ChartType = 'doughnut';
 
   constructor(public uServ: UsersService) {}
 

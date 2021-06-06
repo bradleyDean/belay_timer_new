@@ -7,20 +7,20 @@ import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DoughnutChartModule } from './doughnut-chart/doughnut-chart.module';
 
-// import { DoughnutChartComponent } from './doughnut-chart/doughnut-chart.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    // DoughnutChartComponent
    ],
   entryComponents: [],
   imports: [BrowserModule,
     IonicModule.forRoot(),
     AppRoutingModule,
     BrowserAnimationsModule,
-    // DoughnutChartComponent
+    DoughnutChartModule
+
   ],
   providers: [
     { provide: RouteReuseStrategy,

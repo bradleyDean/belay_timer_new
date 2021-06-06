@@ -14,3 +14,29 @@
     <mat-date-range-picker touchUi #picker></mat-date-range-picker>
   </mat-form-field>
 </div>
+
+<div style="display: block">
+  <canvas baseChart
+    [data]="doughnutChartData"
+    [labels]="doughnutChartLabels"
+    [chartType]="doughnutChartType">
+  </canvas>
+</div>
+
+
+<!-- <div style="display: block">
+<canvas baseChart
+  [attr.data]="doughnutChartData"
+  [attr.labels]="doughnutChartLabels"
+  [attr.chartType]="doughnutChartType">
+</canvas>
+</div>
+ -->
+
+<!-- <div style="display: block">
+  <canvas baseChart
+    [data]="doughnutChartData"
+    [labels]="doughnutChartLabels"
+    [chartType]="doughnutChartType">
+  </canvas>
+</div> -->

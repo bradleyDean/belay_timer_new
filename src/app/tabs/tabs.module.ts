@@ -7,13 +7,18 @@ import { TabsPageRoutingModule } from './tabs-routing.module';
 
 import { TabsPage } from './tabs.page';
 
+// import { DoughnutChartComponent } from '../doughnut-chart/doughnut-chart.component';
+
 @NgModule({
   imports: [
     IonicModule,
     CommonModule,
     FormsModule,
-    TabsPageRoutingModule
+    TabsPageRoutingModule,
   ],
-  declarations: [TabsPage]
+  declarations: [
+    TabsPage,
+    // DoughnutChartComponent
+   ]
 })
 export class TabsPageModule {}

@@ -13,6 +13,52 @@
     </ion-toolbar>
   </ion-header>
 
+  <app-doughnut-chart
+    *ngIf="partners && partners.length == 2 && partners[0] && partners[1]"
+    [partners]="partners"
+  >
+
+  </app-doughnut-chart>
+
+  <!-- <mat-form-field>
+    <mat-label>Enter a date range</mat-label>
+    <mat-date-range-input [rangePicker]="picker">
+      <input matStartDate matInput placeholder="Start date">
+      <input matEndDate matInput placeholder="End date">
+    </mat-date-range-input>
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-date-range-picker touchUi #picker></mat-date-range-picker>
+  </mat-form-field> -->
+
+
+  <!-- <app-doughnut-chart>
+
+  </app-doughnut-chart> -->
+
+<!-- <ion-grid>
+  <ion-row>
+    <ion-col>
+      Belay Times
+    </ion-col>
+    <ion-row>
+      <ion-col >
+      For
+    </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+
+      </ion-col>
+    </ion-row>
+
+  </ion-row>
+
+
+</ion-grid> -->
+
+
+
 
 
 </ion-content>

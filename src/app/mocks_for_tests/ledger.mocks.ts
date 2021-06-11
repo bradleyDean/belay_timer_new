@@ -5,7 +5,7 @@ let date = new Date(2019, 7, 28);
 export const date_1 = convertDateToDDMMYYYYString_(date);
 
 date = new Date(2019, 8, 3);
-export const date_2 = convertDateToDDMMYYYYString_(date);
+export const date_2 = convertDateToDDMMYYYYString_(date); //*
 
 date = new Date(2020, 5, 14);
 export const date_3 = convertDateToDDMMYYYYString_(date);
@@ -14,7 +14,7 @@ date = new Date(2020, 6, 1);
 export const date_4 = convertDateToDDMMYYYYString_(date);
 
 date = new Date(2020, 11, 16);
-export const date_5 = convertDateToDDMMYYYYString_(date);
+export const date_5 = convertDateToDDMMYYYYString_(date); //*
 
 date = new Date(2021, 3, 29);
 export const date_6 = convertDateToDDMMYYYYString_(date);
@@ -91,6 +91,30 @@ export const belay_ledger_6_dates: BelayLedger = {
   }
 }
 
+export const belay_ledger_for_data_summaries: BelayLedger = {
+  subject_id:"A",
+  belay_records:{
+    [date_1]:{
+      gave:{
+        "C": 126,
+        "D": 325
+      },
+      recieved:{"C": 130, "D": 300}
+    },
+    [date_2]:{ //<--earliest A,B pair
+      gave:{"B":10},
+      recieved:{"C":64} //<--B did not belay A on this date, but the "gave" property should register
+    },
+    [date_3]:{
+      gave:{"C":126},
+      recieved:{"B":10, "C":175}
+    },
+    [date_4] : {gave: {"C":10}, recieved: {"C":10}},
+
+    [date_5] : {gave: {"C":10}, recieved: {"B":10}},//<--last time A and B climbed together
+    [date_6] : {gave: {"C":10}, recieved: {"C":10}}
+  }
+}
 
 // export const belayLedger_no_belay_records:BelayLedger = {
 //   subject_id:1,

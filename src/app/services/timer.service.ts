@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LedgerService } from '../services/ledger.service';
 import { UserArrayEntry } from '../interfaces/users';
-import { BehaviorSubject, Observable,ReplaySubject } from '../../../node_modules/rxjs';
+import { BehaviorSubject, Observable } from '../../../node_modules/rxjs';
 
 
 class StopWatch {
@@ -237,7 +237,7 @@ export class TimerService {
   async saveOrUpdateBelayerTime(stopWatchesKey:string){
     try{
       const [belayerId, climberId] = stopWatchesKey.split("_");
-      console.log(`belayerId: ${belayerId}, climberId: ${climberId}`)
+      // console.log(`belayerId: ${belayerId}, climberId: ${climberId}`)
 
 
       let gave:number;

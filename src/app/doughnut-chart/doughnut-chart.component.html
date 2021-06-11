@@ -1,12 +1,12 @@
-<p *ngIf="partners && partners[0]">
-  {{partners[0].name}}
-</p>
 
-<div *ngIf="dataReady">
+<div *ngIf="showDatePicker">
 
   <mat-form-field>
     <mat-label>Enter a date range</mat-label>
-    <mat-date-range-input [rangePicker]="picker">
+    <mat-date-range-input
+    [rangePicker]="picker"
+    (dateChange)="handleDateChange()"
+    >
       <input matStartDate matInput placeholder="Start date">
       <input matEndDate matInput placeholder="End date">
     </mat-date-range-input>
@@ -15,10 +15,10 @@
   </mat-form-field>
 </div>
 
-<div style="display: block">
+<div *ngIf="dataReady" style="display: block">
   <canvas baseChart
-    [data]="doughnutChartData"
-    [labels]="doughnutChartLabels"
+    [data]="totalTimes"
+    [labels]="labels"
     [chartType]="doughnutChartType">
   </canvas>
 </div>

@@ -4,7 +4,7 @@ import { FilesService } from './files.service';
 import { BelayLedger } from '../interfaces/ledgers';
 
 import { belayLedger_1, belay_ledger_6_dates, date_1,date_2,date_3,
-   date_4, date_5, date_6 } from '../mocks_for_tests/ledger.mocks';
+   date_4, date_5, date_6, belay_ledger_for_data_summaries } from '../mocks_for_tests/ledger.mocks';
 
 describe('LedgerService: Isolated Test (using mocked file system)', () => {
   let service: LedgerService;
@@ -254,7 +254,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
     ).toBeRejectedWith( new Error("argument error: startDate > endDate") );
   })
 
-  fit("getBelayTimeSummaryForPartnersInDateRange should do what its name implies it does",
+  it("getBelayTimeSummaryForPartnersInDateRange should do what its name implies it does",
   async ( done:DoneFn  )=>{
     const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
     getLedgerOfUserSpy.and.resolveTo(belay_ledger_6_dates);
@@ -275,6 +275,23 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
   done();
 });
 
+fit("getDefaultStartAndEndDates should return date pair marking the earliest and latest\
+ that at least one user belayed the other", async (done:DoneFn )=>{
+
+    const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
+    getLedgerOfUserSpy.and.resolveTo(belay_ledger_for_data_summaries);
+
+    const dateRangeObject:{start:Date,end:Date} = await service.getDefaultStartAndEndDates("A","B");
+    console.log('TEST::  expected start:')
+    console.log(new Date(date_2));
+
+    console.log('TEST::  expected end:')
+    console.log(new Date(date_5));
+
+    expect(dateRangeObject.start).toEqual(new Date(date_2));
+    expect(dateRangeObject.end).toEqual(new Date(date_5));
+    done();
+ });
 });
 
 

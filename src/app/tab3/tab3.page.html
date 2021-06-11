@@ -14,8 +14,9 @@
   </ion-header>
 
   <app-doughnut-chart
-    *ngIf="partners && partners.length == 2 && partners[0] && partners[1]"
-    [partners]="partners"
+    *ngIf="doughnutChartCompInfoReady"
+    [users$]="partners$"
+    [users]="partners"
   >
 
   </app-doughnut-chart>

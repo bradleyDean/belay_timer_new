@@ -15,7 +15,7 @@ let timer: any = null;
 const ctx = self as any;
 
 self.onmessage = ( event:MessageEvent )=>{
-  console.log(`**** worker recieved message as: ${event.data}`)
+  // console.log(`**** worker recieved message as: ${event.data}`)
   if (event.data == "start"){
     if (!timer){
       secondsElapsed = 0;
@@ -26,10 +26,10 @@ self.onmessage = ( event:MessageEvent )=>{
       }, 1000);
     }
   }else if(event.data == "stop"){ //assume that event.data == "stop"
-    console.log("worker got STOP message" );
+    // console.log("worker got STOP message" );
     secondsElapsed = 0;
     if(ctx.timer){
-      console.log("******** clearInterval called ***********");
+      // console.log("******** clearInterval called ***********");
       clearInterval(ctx.timer);
     }
     ctx.timer = null;

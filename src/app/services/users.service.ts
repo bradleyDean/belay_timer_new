@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FilesService } from '../services/files.service';
 import { pathMap } from '../shared_constants/paths';
 import { UserArrayEntry } from '../interfaces/users';
-import { BehaviorSubject, Observable,ReplaySubject } from '../../../node_modules/rxjs';
+import { BehaviorSubject, Observable } from '../../../node_modules/rxjs';
 
 @Injectable({
   providedIn: 'root'

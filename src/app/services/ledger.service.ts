@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { FilesService } from '../services/files.service';
 
-import { BelayLedger, BelayRecord } from '../interfaces/ledgers';
+import { BelayLedger, BelayRecord, DateRange} from '../interfaces/ledgers';
+import { Observable, BehaviorSubject, combineLatest } from '../../../node_modules/rxjs';
+
 import { pathMap } from '../shared_constants/paths';
 
 @Injectable({
@@ -9,6 +11,9 @@ import { pathMap } from '../shared_constants/paths';
 })
 export class LedgerService {
 
+  // private dataSummarySubject:BehaviorSubject<BelayDataSummary> = new BehaviorSubject(null);
+  // public dataSummaryForUsers$:Observable<BelayDataSummary> = this.dataSummarySubject.asObservable();
+  //
   constructor(private fService: FilesService) {}
 
   createBelayRecord(partner_id:string, gave:number, recieved:number):BelayRecord{
@@ -171,6 +176,85 @@ export class LedgerService {
     };
   }
 
+  /*
+  * @remarks: get date pair marking the earliest and latest that at least
+  *           one of these users belayed the other
+  */
+  async getDefaultStartAndEndDates(uid1:string, uid2:string):Promise<DateRange>{
+    const ledger = await this.getLedgerOfUser(uid1);
+    // console.log("getDefaultStartAndEndDates got ledger as:");
+    // console.log(ledger)  ;
+
+    if(ledger && Object.keys(ledger).includes("belay_records") ){
+      const records = ledger.belay_records;
+
+      // console.log("getDefaultStartAndEndDates got records as:");
+      // console.log(records);
+
+      const dates = Object.keys(records);
+      // console.log("******* dates ***********");
+      // console.log(dates);
+
+      let startDate:Date = null; // = new Date(dates[0]);
+      let endDate:Date = null; //= new Date(dates[0]);
+
+      dates.forEach(( dateString )=>{
+        const tempDate = new Date(dateString);
+
+        const belayRecord = records[dateString];
+        if(Object.keys(belayRecord).includes("gave")){
+          //did uid1 belay uid2 on this date?
+
+          console.log("getDefaultStartAndEndDates got belayRecord as:");
+          console.log(belayRecord);
+
+          if(Object.keys(belayRecord["gave"]).includes(uid2) ){
+            if(!startDate){
+              startDate = tempDate;
+            }
+            if(!endDate){
+              endDate = tempDate;
+            }
+            if(tempDate < startDate){
+              startDate = tempDate;
+            }else if(tempDate > endDate){
+              endDate = tempDate;
+            }
+          }
+        }
+        if(Object.keys(belayRecord).includes("recieved")){
+          //did uid2 belay uid1 on this date?
+          if(Object.keys(belayRecord["recieved"]).includes(uid2) ){
+            if(!startDate){
+              startDate = tempDate;
+            }
+            if(!endDate){
+              endDate = tempDate;
+            }
+            if(tempDate < startDate){
+              startDate = tempDate;
+            }else if(tempDate > endDate){
+              endDate = tempDate;
+            }
+          }
+        }
+      });
+      // console.log("returning:");
+      // console.log(
+      //   {
+      //     start:startDate,
+      //     end:endDate
+      //   });
+
+      return {
+        start:startDate,
+        end:endDate
+    }
+  }
+  return null;
+}
+
+
   async getAllBelayerRecordsOfBelayerInDateRange(belayerId:string, startDate:Date,
     endDate:Date):Promise<BelayRecord[]>{
       //"forget" time of day and collapse argument dates to same date if happened on same day.
@@ -238,9 +322,13 @@ async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:
       if("gave" in record && partner2_id in record.gave){
         totals[key12] += record.gave[partner2_id];
       }
-      if("recieved" in record && partner1_id in record.recieved){
-        totals[key21] += record.recieved[partner1_id];
+      // if("recieved" in record && partner1_id in record.recieved){
+      //   totals[key21] += record.recieved[partner1_id];
+      // }
+      if("recieved" in record && partner2_id in record.recieved){
+        totals[key21] += record.recieved[partner2_id];
       }
+
     });
 
     return totals;

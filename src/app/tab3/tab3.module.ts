@@ -7,9 +7,6 @@ import { Tab3Page } from './tab3.page';
 
 // import { DoughnutChartComponent } from '../doughnut-chart/doughnut-chart.component';
 
-import { MatDatepickerModule, } from '@angular/material/datepicker';
-import {  MatNativeDateModule,} from '@angular/material/core';
-import {   MatInputModule } from '@angular/material/input';
 // import { DoughnutChartComponent } from '../doughnut-chart/doughnut-chart.component';
 import { DoughnutChartModule } from '../doughnut-chart/doughnut-chart.module';
 
@@ -28,10 +25,6 @@ import { Tab3PageRoutingModule } from './tab3-routing.module';
     // DoughnutChartComponent
 
     DoughnutChartModule,
-
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatInputModule,
 
 
   ],

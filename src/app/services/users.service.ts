@@ -93,8 +93,8 @@ export class UsersService {
       // console.log(pathMap);
 
       const users = await  this.fService.fileRead(pathMap['users']);
-      console.log('in readUsersArray:.......')
-      console.log(users);
+      // console.log('in readUsersArray:.......')
+      // console.log(users);
       // this.usersArray = JSON.parse(users_string) as UserArrayEntry[];
       this.usersArray = users as UserArrayEntry[];
       // console.log('Got usersArray as: ')
@@ -121,8 +121,8 @@ export class UsersService {
       // console.log(pathMap);
 
       const owner_rec = await  this.fService.fileRead(pathMap['owner']);
-      console.log('in readOwnerRecord:.......')
-      console.log(owner_rec);
+      // console.log('in readOwnerRecord:.......')
+      // console.log(owner_rec);
       // this.usersArray = JSON.parse(users_string) as UserArrayEntry[];
       const owner = owner_rec ? owner_rec : null as UserArrayEntry ;
       // console.log('Got usersArray as: ')
@@ -162,12 +162,12 @@ export class UsersService {
     //check that user is actually in the userArray
 
     const currUsers:UserArrayEntry[] = this.usersSubject.value;
-    console.log("currUsers: ")
-    console.log(currUsers);
-    console.log("user");
-    console.log(user);
+    // console.log("currUsers: ")
+    // console.log(currUsers);
+    // console.log("user");
+    // console.log(user);
     const i = currUsers.findIndex((u:UserArrayEntry)=>{
-      console.log("checking u,user: " + u.name + ", "+user.name);
+      // console.log("checking u,user: " + u.name + ", "+user.name);
       return u.name == user.name && u.id == user.id;
     });
 
@@ -178,7 +178,7 @@ export class UsersService {
       updatedUsersArray.unshift(user);
 
     }else{
-    console.log('NOT REMOVING NOTHING!');
+    // console.log('NOT REMOVING NOTHING!');
       updatedUsersArray.unshift(user);
     }
 
@@ -239,8 +239,8 @@ export class UsersService {
   */
   async writeOwnerRecord(owner:UserArrayEntry){
     const owner_JSON = JSON.stringify(owner);
-    console.log('writing owner JSON to file: ')
-    console.log(owner_JSON)
+    // console.log('writing owner JSON to file: ')
+    // console.log(owner_JSON)
     try{
       //if the file already exists, delete it and rewrite it
       const file_exists = await this.fService.fileOrDirExists(pathMap['owner']);

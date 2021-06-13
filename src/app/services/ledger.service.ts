@@ -205,8 +205,8 @@ export class LedgerService {
         if(Object.keys(belayRecord).includes("gave")){
           //did uid1 belay uid2 on this date?
 
-          console.log("getDefaultStartAndEndDates got belayRecord as:");
-          console.log(belayRecord);
+          // console.log("getDefaultStartAndEndDates got belayRecord as:");
+          // console.log(belayRecord);
 
           if(Object.keys(belayRecord["gave"]).includes(uid2) ){
             if(!startDate){
@@ -246,6 +246,10 @@ export class LedgerService {
       //     end:endDate
       //   });
 
+      if(!startDate || !endDate){
+        console.log(`ledgerServ, startDate:${startDate}, endDate: ${endDate} `);
+      }
+      
       return {
         start:startDate,
         end:endDate
@@ -308,30 +312,36 @@ export class LedgerService {
 async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:string, startDate:Date,
     endDate:Date):Promise<{ [key:string]:number }>{
 
-  const allBelayRecords:BelayRecord[] =
-    await this.getAllBelayerRecordsOfBelayerInDateRange(partner1_id, startDate,endDate);
-    const key12 = this.getBelayTimeSummaryKey(partner1_id,partner2_id);
-    const key21 = this.getBelayTimeSummaryKey(partner2_id,partner1_id);
+      try{
+        const allBelayRecords:BelayRecord[] =
+          await this.getAllBelayerRecordsOfBelayerInDateRange(partner1_id, startDate,endDate);
+          const key12 = this.getBelayTimeSummaryKey(partner1_id,partner2_id);
+          const key21 = this.getBelayTimeSummaryKey(partner2_id,partner1_id);
 
-    const totals = {
-      [key12]: 0,
-      [key21]: 0
-    };
+          const totals = {
+            [key12]: 0,
+            [key21]: 0
+          };
 
-    allBelayRecords.forEach(( record:BelayRecord )=>{
-      if("gave" in record && partner2_id in record.gave){
-        totals[key12] += record.gave[partner2_id];
+          allBelayRecords.forEach(( record:BelayRecord )=>{
+            if("gave" in record && partner2_id in record.gave){
+              totals[key12] += record.gave[partner2_id];
+            }
+            // if("recieved" in record && partner1_id in record.recieved){
+            //   totals[key21] += record.recieved[partner1_id];
+            // }
+            if("recieved" in record && partner2_id in record.recieved){
+              totals[key21] += record.recieved[partner2_id];
+            }
+
+          });
+
+          return totals;
       }
-      // if("recieved" in record && partner1_id in record.recieved){
-      //   totals[key21] += record.recieved[partner1_id];
-      // }
-      if("recieved" in record && partner2_id in record.recieved){
-        totals[key21] += record.recieved[partner2_id];
-      }
+      catch(error){
+        console.log(error);
+      };
 
-    });
-
-    return totals;
   }
 
   getBelayTimeSummaryKey(gaveId:string, recievedId:string):string{

@@ -42,11 +42,11 @@ export class Tab3Page implements OnInit, OnDestroy {
     });
 
     this.partnersSubscrip = this.partners$.subscribe(( partners:UserArrayEntry[] )=>{
-      console.log("tab3.ts, partnersSubscrip fired and partners is:");
-      console.log(partners);
+      // console.log("tab3.ts, partnersSubscrip fired and partners is:");
+      // console.log(partners);
       if(partners.every(partner => !!partner)){
         this.partners = partners;
-        console.log("**** setting doughnutChartCompInfoReady to true ******** ");
+        // console.log("**** setting doughnutChartCompInfoReady to true ******** ");
         this.doughnutChartCompInfoReady = true;
       }
     });

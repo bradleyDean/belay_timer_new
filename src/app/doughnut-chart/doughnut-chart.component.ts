@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { FormGroup, FormControl } from '@angular/forms';
 
-import { Observable, BehaviorSubject, Subscription, combineLatest } from '../../../node_modules/rxjs';
+import { Observable, BehaviorSubject, Subscription, combineLatest, forkJoin } from '../../../node_modules/rxjs';
 
-import { MatDatepickerModule, } from '@angular/material/datepicker';
+import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
 import {  MatNativeDateModule,} from '@angular/material/core';
 import {   MatInputModule } from '@angular/material/input';
 
@@ -29,18 +30,32 @@ export class DoughnutChartComponent implements OnInit {
   // private dataSummarySubject:BehaviorSubject<BelayDataSummary> = new BehaviorSubject(null);
   // public dataSummaryForUsers$:Observable<BelayDataSummary> = this.dataSummarySubject.asObservable();
   //
+  startDateSubject:BehaviorSubject<Date> = new BehaviorSubject(null);
+  startDate$:Observable<Date> = this.startDateSubject.asObservable();
+  startDate:Date;
+
+  endDateSubject:BehaviorSubject<Date> = new BehaviorSubject(null);
+  endDate$:Observable<Date> = this.endDateSubject.asObservable();
+
+  dateRangeSubject:BehaviorSubject<DateRange> = new BehaviorSubject(null);
+  dateRangeSubscription:Subscription;
+  dateRange$:Observable<DateRange> = this.dateRangeSubject.asObservable();
+  dateRange:DateRange;
+  previousDateRange:DateRange = {
+    start:null,
+    end:null
+  };
 
   chartUpdaterSubscription:Subscription; //combines relevant observables and triggers chart property reassignments
 
-  dateRangeSubject:BehaviorSubject<DateRange> = new BehaviorSubject(null);
-  dateRange$:Observable<DateRange> = this.dateRangeSubject.asObservable();
-  dateRange:DateRange;
+  rangeFormGroup = new FormGroup({
+    start: new FormControl(),
+    end: new FormControl()
+  });
+
+  rangeFormGroupChangeSubscription:Subscription;
 
   public labels: Label[] = [];
-  // public totalTimes: MultiDataSet = [
-  //   []
-  // ];
-  //
   public totalTimes: SingleDataSet = [];
 
   public doughnutChartType: ChartType = 'doughnut';
@@ -49,28 +64,66 @@ export class DoughnutChartComponent implements OnInit {
   showDatePicker = false;
 
   constructor(public ledgerServ:LedgerService, ) {
-    console.log("doughnutChartComponent construtor!!!");
+    // console.log("doughnutChartComponent construtor!!!");
   }
 
   async ngOnInit(){
-    console.log("doughnut-chart component ngOnInit");
+    // console.log("doughnut-chart component ngOnInit");
 
     if(!this.dateRange){
-      console.log("No date range yet!");
+      // console.log("No date range yet!");
       this.dateRange = await this.ledgerServ.getDefaultStartAndEndDates(this.users[0].id,this.users[1].id);
       this.dateRangeSubject.next(this.dateRange);
     }
 
 
+    // this.rangeFormGroupChangeSubscription = this.rangeFormGroup.get("end").
+    // valueChanges.subscribe(( endDate:Date  )=>{
+    //   const newDateRange:DateRange = {
+    //     start: this.rangeFormGroup.get("start").value,
+    //     end: endDate
+    //   }
+    //   // this.dateRange = newDateRange;
+    //   this.dateRangeSubject.next(newDateRange);
+    // });
+    //
+    this.rangeFormGroupChangeSubscription = combineLatest([
+      this.rangeFormGroup.get("start").valueChanges,
+      this.rangeFormGroup.get("end").valueChanges
+    ],(startDate:Date, endDate:Date)=>{
+      if(startDate && endDate){//callback fired sometimes when startDate or endDate is still null;
+      this.formatDate(startDate);
+      this.formatDate(endDate);
+
+        if(startDate && endDate){
+          if((!this.previousDateRange.start || !this.previousDateRange.end) ||
+          (this.previousDateRange.start.getTime() != startDate.getTime() ||
+          this.previousDateRange.end.getTime() != endDate.getTime())){
+
+            this.previousDateRange = {
+              start: this.rangeFormGroup.get("start").value,
+              end: endDate
+            }
+
+            this.dateRangeSubject.next(this.previousDateRange);
+          }
+        }
+      }
+
+    }
+  ).subscribe();
+
 
     this.chartUpdaterSubscription =
       combineLatest( this.users$, this.dateRange$, async (users:UserArrayEntry[],dateRange:DateRange)=>{
-        if(this.users.every(user =>!!user) && dateRange ){
+        if(this.users.every(user =>!!user) && dateRange){
+
           this.users = users;
           this.labels = users.map( (user:UserArrayEntry) => user.name);
+          this.dateRange = dateRange;
 
-          if(!dateRange){
-            console.log("No date range yet!");
+          if(!this.isDateRangeValid(this.dateRange)){
+            // console.log("No date range yet!");
             this.dateRange = await this.ledgerServ.getDefaultStartAndEndDates(users[0].id,users[1].id);
           }
 
@@ -82,45 +135,50 @@ export class DoughnutChartComponent implements OnInit {
         }
       }).subscribe();
 
-      this.users$.subscribe(( users )=>{
-        console.log("in doughnutChartComponent and users changed! users is:");
-        console.log(users);
-      });
+  }
 
-      this.dateRange$.subscribe((dateRange)=> {
-        console.log('date ranges changed:');
-        console.log(dateRange)
-      })
-    // this.usersSubscription = this.users$.subscribe(async ( users )=>{
-    //   this.users= users;
-    //
-    //   this.labels = users.map( (user:UserArrayEntry) => user.name);
-    //
-    //   users.forEach( async (user)=>{
-    //
-    //     const times = await this.getDataForChart(users[0].id , users[1].id);
-    //     this.totalTimes = times;
-    //     this.dataReady=true;
-    //     console.log("********** doughnutChartComponent, totalTimes is: ************* ");
-    //     console.log(this.totalTimes);
-    //   });
-    //
-    //
-    //   console.log(`doughnut-chart component got users as :`);
-    //   console.log(this.users);
-    //
-    // })
+  isDateRangeValid(dateRange:DateRange):boolean{
+    //dates are truthy?
+    if(!dateRange.start || !dateRange.end ){
+      console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning false`);
+      return false;
+    }
+    //endDate is after or same as startDate
+    if(dateRange.end < dateRange.start){
+      console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning false BECAUSE end<start`);
+      return false;
+    }
+
+    console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning true`);
+    return true;
+  }
+
+  formatDate(date:Date){
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
   }
 
   ngOnDestroy(){
     this.chartUpdaterSubscription.unsubscribe();
-  }
-  handleDateChange(event){
-    console.log("****** Date Changed: **********");
-    console.log(event);
-    // this.dateRangeSubject.next(event);
+    this.rangeFormGroupChangeSubscription.unsubscribe();
   }
 
+
+  // :MatDatepickerInputEvent<>
+  // handleStartDateChange(event:MatDatepickerInputEvent<Date>){
+  //   console.log("******Start Date Changed: **********");
+  //   console.log(event.value);
+  //   // this.dateRangeSubject.next(event.value);
+  // }
+
+  // handleEndDateChange(event:MatDatepickerInputEvent<Date>){
+  //   console.log("****** End Date Changed: **********");
+  //   console.log(event.value);
+  //   // this.dateRangeSubject.next(event.value);
+  // }
+  //
   /*
   * @remarks: this only works for a pair of users.
   */

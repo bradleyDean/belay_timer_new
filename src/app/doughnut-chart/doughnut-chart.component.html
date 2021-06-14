@@ -30,6 +30,9 @@
     [chartType]="doughnutChartType">
   </canvas>
 </div>
+<div class="danger" *ngIf="showNoDataAvailableMessage">
+  <h1> {{users[0].name}} and {{users[1].name}} have never belayed each other!</h1>
+</div>
 
 
 <!-- <div style="display: block">

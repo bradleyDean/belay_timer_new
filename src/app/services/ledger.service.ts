@@ -247,9 +247,10 @@ export class LedgerService {
       //   });
 
       if(!startDate || !endDate){
-        console.log(`ledgerServ, startDate:${startDate}, endDate: ${endDate} `);
+        console.log(`******ledgerServ, startDate:${startDate}, endDate: ${endDate}******** `);
+        return null;
       }
-      
+
       return {
         start:startDate,
         end:endDate

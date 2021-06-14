@@ -26,6 +26,7 @@ export class DoughnutChartComponent implements OnInit {
   @Input() users: UserArrayEntry[];
   @Input() users$: Observable<UserArrayEntry[]>;
   usersSubscription:Subscription;
+  previousUsers:UserArrayEntry[] = null; //use to notice changes in the selected users
 
   // private dataSummarySubject:BehaviorSubject<BelayDataSummary> = new BehaviorSubject(null);
   // public dataSummaryForUsers$:Observable<BelayDataSummary> = this.dataSummarySubject.asObservable();
@@ -59,10 +60,10 @@ export class DoughnutChartComponent implements OnInit {
   public totalTimes: SingleDataSet = [];
 
   public doughnutChartType: ChartType = 'doughnut';
+
   dataReady = false;
-
   showDatePicker = false;
-
+  showNoDataAvailableMessage = false;
   constructor(public ledgerServ:LedgerService, ) {
     // console.log("doughnutChartComponent construtor!!!");
   }
@@ -70,38 +71,38 @@ export class DoughnutChartComponent implements OnInit {
   async ngOnInit(){
     // console.log("doughnut-chart component ngOnInit");
 
-    if(!this.dateRange){
-      // console.log("No date range yet!");
+    if(!this.dateRange){ //guarantee that dateRange$ emits once, triggering the chartUpdaterSubscription
       this.dateRange = await this.ledgerServ.getDefaultStartAndEndDates(this.users[0].id,this.users[1].id);
-      this.dateRangeSubject.next(this.dateRange);
+      this.dateRangeSubject.next(this.dateRange); //this can emit null, for example if the users never climbed together.
     }
 
-
-    // this.rangeFormGroupChangeSubscription = this.rangeFormGroup.get("end").
-    // valueChanges.subscribe(( endDate:Date  )=>{
-    //   const newDateRange:DateRange = {
-    //     start: this.rangeFormGroup.get("start").value,
-    //     end: endDate
-    //   }
-    //   // this.dateRange = newDateRange;
-    //   this.dateRangeSubject.next(newDateRange);
-    // });
-    //
+    /*
+    * rangeFormGroupChangeSubscription triggers the dateRangeSubject's .next method.
+    * dateRangeSubject will emit an updated DateRange object when the date range changes (and is valid)
+    */
     this.rangeFormGroupChangeSubscription = combineLatest([
       this.rangeFormGroup.get("start").valueChanges,
       this.rangeFormGroup.get("end").valueChanges
     ],(startDate:Date, endDate:Date)=>{
       if(startDate && endDate){//callback fired sometimes when startDate or endDate is still null;
+      //set hours,minutes,seconds and miliseconds to zero
       this.formatDate(startDate);
       this.formatDate(endDate);
 
-        if(startDate && endDate){
-          if((!this.previousDateRange.start || !this.previousDateRange.end) ||
+        if(startDate && endDate){ //there is both a start and and end date
+          if((!this.previousDateRange.start || !this.previousDateRange.end)//either previous date is undefined
+           ||
+           //...or the start or ending date has changed
           (this.previousDateRange.start.getTime() != startDate.getTime() ||
           this.previousDateRange.end.getTime() != endDate.getTime())){
 
-            this.previousDateRange = {
-              start: this.rangeFormGroup.get("start").value,
+            // this.previousDateRange = { //update the previous with the new values
+            //   start: this.rangeFormGroup.get("start").value,
+            //   end: endDate
+            // }
+
+            this.previousDateRange = { //update the previous with the new values
+              start: startDate,
               end: endDate
             }
 
@@ -109,29 +110,43 @@ export class DoughnutChartComponent implements OnInit {
           }
         }
       }
-
     }
   ).subscribe();
 
 
     this.chartUpdaterSubscription =
       combineLatest( this.users$, this.dateRange$, async (users:UserArrayEntry[],dateRange:DateRange)=>{
-        if(this.users.every(user =>!!user) && dateRange){
+
+        console.log(`chartUpdaterSubscription fired! :`);
+        // && dateRange
+        if(this.users.every(user =>!!user) ){
 
           this.users = users;
           this.labels = users.map( (user:UserArrayEntry) => user.name);
           this.dateRange = dateRange;
 
-          if(!this.isDateRangeValid(this.dateRange)){
-            // console.log("No date range yet!");
+          //there is an invalid dateRange or the selected users has changed
+          if(!this.isDateRangeValid(this.dateRange) ||
+          (this.previousUsers && this.previousUsers.length === users.length &&
+          (this.previousUsers[0] != users[0] || this.previousUsers[1] != users[1]) )){
             this.dateRange = await this.ledgerServ.getDefaultStartAndEndDates(users[0].id,users[1].id);
           }
 
-          this.totalTimes = await this.getDataForChart(users[0].id,users[1].id, this.dateRange);
+          //if there is (now) a valid dateRange for these users
+          //update the chart with the relevant data and show it.
+          if(this.isDateRangeValid(this.dateRange)){
+            this.totalTimes = await this.getDataForChart(users[0].id,users[1].id, this.dateRange);
 
-          this.dataReady= true;
-          this.showDatePicker = true;
-          console.log('doughnutChartComponent, chartUpdaterSubscription fired!');
+            this.showNoDataAvailableMessage = false;
+            this.dataReady = true;
+            this.showDatePicker = true;
+            console.log('doughnutChartComponent, chartUpdaterSubscription fired!');
+          }else{//there is no available data for these users
+            this.dataReady = false;
+            this.showDatePicker = false;
+            this.showNoDataAvailableMessage = true;
+          }
+
         }
       }).subscribe();
 
@@ -139,17 +154,17 @@ export class DoughnutChartComponent implements OnInit {
 
   isDateRangeValid(dateRange:DateRange):boolean{
     //dates are truthy?
-    if(!dateRange.start || !dateRange.end ){
-      console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning false`);
+    if(!dateRange || !dateRange.start || !dateRange.end ){
+      // console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning false`);
       return false;
     }
     //endDate is after or same as startDate
     if(dateRange.end < dateRange.start){
-      console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning false BECAUSE end<start`);
+      // console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning false BECAUSE end<start`);
       return false;
     }
 
-    console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning true`);
+    // console.log(`isDateRangeValid, start: ${dateRange.start}, end:${dateRange.end} returning true`);
     return true;
   }
 

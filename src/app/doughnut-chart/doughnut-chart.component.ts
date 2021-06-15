@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ViewEncapsulation } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 
 import { Observable, BehaviorSubject, Subscription, combineLatest, forkJoin } from '../../../node_modules/rxjs';
 
-import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { MatDatepickerModule, MatDatepickerInputEvent, MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import {  MatNativeDateModule,} from '@angular/material/core';
 import {   MatInputModule } from '@angular/material/input';
 
@@ -21,6 +21,7 @@ import { UserArrayEntry } from '../interfaces/users';
   selector: 'app-doughnut-chart',
   templateUrl: './doughnut-chart.component.html',
   styleUrls: ['./doughnut-chart.component.scss'],
+  encapsulation:ViewEncapsulation.None
 })
 export class DoughnutChartComponent implements OnInit {
   @Input() users: UserArrayEntry[];
@@ -64,12 +65,16 @@ export class DoughnutChartComponent implements OnInit {
   dataReady = false;
   showDatePicker = false;
   showNoDataAvailableMessage = false;
+
+  dateClass:MatCalendarCellClassFunction<Date>;
+
   constructor(public ledgerServ:LedgerService, ) {
     // console.log("doughnutChartComponent construtor!!!");
   }
 
   async ngOnInit(){
     // console.log("doughnut-chart component ngOnInit");
+
 
     if(!this.dateRange){ //guarantee that dateRange$ emits once, triggering the chartUpdaterSubscription
       this.dateRange = await this.ledgerServ.getDefaultStartAndEndDates(this.users[0].id,this.users[1].id);
@@ -121,6 +126,9 @@ export class DoughnutChartComponent implements OnInit {
         // && dateRange
         if(this.users.every(user =>!!user) ){
 
+          const uid1 = users[0].id;
+          const uid2 = users[1].id;
+
           this.users = users;
           this.labels = users.map( (user:UserArrayEntry) => user.name);
           this.dateRange = dateRange;
@@ -136,6 +144,34 @@ export class DoughnutChartComponent implements OnInit {
           //update the chart with the relevant data and show it.
           if(this.isDateRangeValid(this.dateRange)){
             this.totalTimes = await this.getDataForChart(users[0].id,users[1].id, this.dateRange);
+            const relevantDates = await this.ledgerServ.getRelevantDates(users[0].id,users[1].id);
+
+            this.dateClass  = ( cellDate:Date ,view )=>{
+              if(view == "month"){
+                const date = cellDate.getTime();
+                console.log(`date: ${date}`);
+
+                const ownerTimes = relevantDates[uid1].map(d=>d.getTime());
+                const partnerTimes = relevantDates[uid2].map(d=>d.getTime());
+
+                if(ownerTimes.includes(date)) {
+                  if(partnerTimes.includes(date) ){
+                    return 'both-color';
+                  }else{
+                    return 'owner-color';
+                  }
+                }
+
+                if(partnerTimes.includes(date)){
+                  return 'partner-color'
+                }else{
+                  //no one belayed
+                  return ''
+                }
+              }
+              return '';
+            };
+
 
             this.showNoDataAvailableMessage = false;
             this.dataReady = true;
@@ -173,6 +209,10 @@ export class DoughnutChartComponent implements OnInit {
     date.setMinutes(0);
     date.setSeconds(0);
     date.setMilliseconds(0);
+  }
+
+  ionViewDidEnter(){
+    console.log("doughnutChartComponent: ionViewDidEnter!!!!!!!");
   }
 
   ngOnDestroy(){

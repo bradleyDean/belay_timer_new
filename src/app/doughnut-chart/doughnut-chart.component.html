@@ -19,7 +19,12 @@
       >
     </mat-date-range-input>
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-date-range-picker touchUi #picker></mat-date-range-picker>
+
+    <mat-date-range-picker
+      #picker
+      touchUi
+      [dateClass]="dateClass" >
+    </mat-date-range-picker>
   </mat-form-field>
 </div>
 
@@ -28,11 +33,16 @@
     [data]="totalTimes"
     [labels]="labels"
     [chartType]="doughnutChartType">
+
   </canvas>
 </div>
 <div class="danger" *ngIf="showNoDataAvailableMessage">
   <h1> {{users[0].name}} and {{users[1].name}} have never belayed each other!</h1>
 </div>
+
+<!-- <div class="owner-color">
+<h1> TEST TEST</h1>
+</div> -->
 
 
 <!-- <div style="display: block">

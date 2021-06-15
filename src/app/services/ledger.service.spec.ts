@@ -292,6 +292,23 @@ fit("getDefaultStartAndEndDates should return date pair marking the earliest and
     expect(dateRangeObject.end).toEqual(new Date(date_5));
     done();
  });
+
+fit("getRelevantDates should find all relevent dates and return them", async (done:DoneFn )=>{
+
+    const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
+    getLedgerOfUserSpy.and.resolveTo(belay_ledger_for_data_summaries);
+
+    const relevantDates:{[key:string]:Date[]} = await service.getRelevantDates("A","B");
+
+    //
+    // const key12 = service.getBelayTimeSummaryKey("A","B");
+    // const key21 = service.getBelayTimeSummaryKey("B","A");
+    //
+    expect(relevantDates["A"]).toEqual([new Date(date_2)]);
+    expect(relevantDates["B"]).toEqual([new Date(date_3), new Date(date_5)]);
+
+    done();
+ });
 });
 
 

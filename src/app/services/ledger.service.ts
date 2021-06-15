@@ -284,14 +284,7 @@ export class LedgerService {
           return []
         }
         for (let dateString of Object.keys(ledger.belay_records)){
-
-          // console.log("******************");
-          // console.log(dateString);
           const dateKey:Date = new Date(dateString);
-          // console.log("Checking dateKey:");
-          // console.log(dateKey);
-          // console.log("******************");
-
           if(startDate <= dateKey && dateKey <= endDate ){
             targetBelayRecords.push(ledger.belay_records[dateString]);
           }
@@ -345,16 +338,59 @@ async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:
 
   }
 
-  getBelayTimeSummaryKey(gaveId:string, recievedId:string):string{
-    return `${gaveId}_gave_${recievedId}`
-  }
+  async getRelevantDates(partner1_id:string, partner2_id:string):Promise<{ [key:string]:Date[]}>{
+    // await this.(partner1_id,partner2_id);
+    // const key12 = this.getBelayTimeSummaryKey(partner1_id,partner2_id);
+    // const key21 = this.getBelayTimeSummaryKey(partner2_id,partner1_id);
+
+    // const dates:{ [key:string]:Date[]}= {
+    //   [key12]: [],
+    //   [key21]: []
+    // };
+    //
 
 
-  convertDateToDDMMYYYYString(date:Date):string {
-    //this setup is a little weird, but it make convertDateToDDMMYYYYString_ available
-    //in other modules and it makes convertDateToDDMMYYYYString easily mockable in Jasmine with spyOn
-    return convertDateToDDMMYYYYString_(date);
-  }
+    const dates:{ [key:string]:Date[]}= {
+      [partner1_id]: [],
+      [partner2_id]:[]
+    };
+
+    const ledger = await this.getLedgerOfUser(partner1_id);
+    // console.log("Got ledger:");
+    // console.log(ledger);
+
+    if( ! ("belay_records" in ledger)){
+      return null;
+    }
+    for (let dateString of Object.keys(ledger.belay_records)){
+      const date:Date = new Date(dateString);
+
+      //if partner1 belayed partner2 on this date...
+      if(ledger.belay_records[dateString].gave &&
+      Object.keys(ledger.belay_records[dateString].gave).includes(partner2_id)){
+         dates[partner1_id].push(date);
+      }
+
+      //if partner2 belayed partner1 on this date
+      if(ledger.belay_records[dateString].recieved &&
+      Object.keys(ledger.belay_records[dateString].recieved).includes(partner2_id)){
+        dates[partner2_id].push(date);
+       }
+    }
+    return dates;
+
+}
+
+getBelayTimeSummaryKey(gaveId:string, recievedId:string):string{
+  return `${gaveId}_gave_${recievedId}`
+}
+
+
+convertDateToDDMMYYYYString(date:Date):string {
+  //this setup is a little weird, but it make convertDateToDDMMYYYYString_ available
+  //in other modules and it makes convertDateToDDMMYYYYString easily mockable in Jasmine with spyOn
+  return convertDateToDDMMYYYYString_(date);
+}
 
 }
 

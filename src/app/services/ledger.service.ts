@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { FilesService } from '../services/files.service';
 
-import { BelayLedger, BelayRecord } from '../interfaces/ledgers';
+import { BelayLedger, BelayRecord, DateRange} from '../interfaces/ledgers';
+import { Observable, BehaviorSubject, combineLatest } from '../../../node_modules/rxjs';
+
 import { pathMap } from '../shared_constants/paths';
 
 @Injectable({
@@ -9,6 +11,9 @@ import { pathMap } from '../shared_constants/paths';
 })
 export class LedgerService {
 
+  // private dataSummarySubject:BehaviorSubject<BelayDataSummary> = new BehaviorSubject(null);
+  // public dataSummaryForUsers$:Observable<BelayDataSummary> = this.dataSummarySubject.asObservable();
+  //
   constructor(private fService: FilesService) {}
 
   createBelayRecord(partner_id:string, gave:number, recieved:number):BelayRecord{
@@ -167,11 +172,93 @@ export class LedgerService {
       return time;
     }
     catch(error){
-
-
       return null;
     };
   }
+
+  /*
+  * @remarks: get date pair marking the earliest and latest that at least
+  *           one of these users belayed the other
+  */
+  async getDefaultStartAndEndDates(uid1:string, uid2:string):Promise<DateRange>{
+    const ledger = await this.getLedgerOfUser(uid1);
+    // console.log("getDefaultStartAndEndDates got ledger as:");
+    // console.log(ledger)  ;
+
+    if(ledger && Object.keys(ledger).includes("belay_records") ){
+      const records = ledger.belay_records;
+
+      // console.log("getDefaultStartAndEndDates got records as:");
+      // console.log(records);
+
+      const dates = Object.keys(records);
+      // console.log("******* dates ***********");
+      // console.log(dates);
+
+      let startDate:Date = null; // = new Date(dates[0]);
+      let endDate:Date = null; //= new Date(dates[0]);
+
+      dates.forEach(( dateString )=>{
+        const tempDate = new Date(dateString);
+
+        const belayRecord = records[dateString];
+        if(Object.keys(belayRecord).includes("gave")){
+          //did uid1 belay uid2 on this date?
+
+          // console.log("getDefaultStartAndEndDates got belayRecord as:");
+          // console.log(belayRecord);
+
+          if(Object.keys(belayRecord["gave"]).includes(uid2) ){
+            if(!startDate){
+              startDate = tempDate;
+            }
+            if(!endDate){
+              endDate = tempDate;
+            }
+            if(tempDate < startDate){
+              startDate = tempDate;
+            }else if(tempDate > endDate){
+              endDate = tempDate;
+            }
+          }
+        }
+        if(Object.keys(belayRecord).includes("recieved")){
+          //did uid2 belay uid1 on this date?
+          if(Object.keys(belayRecord["recieved"]).includes(uid2) ){
+            if(!startDate){
+              startDate = tempDate;
+            }
+            if(!endDate){
+              endDate = tempDate;
+            }
+            if(tempDate < startDate){
+              startDate = tempDate;
+            }else if(tempDate > endDate){
+              endDate = tempDate;
+            }
+          }
+        }
+      });
+      // console.log("returning:");
+      // console.log(
+      //   {
+      //     start:startDate,
+      //     end:endDate
+      //   });
+
+      if(!startDate || !endDate){
+        console.log(`******ledgerServ, startDate:${startDate}, endDate: ${endDate}******** `);
+        return null;
+      }
+
+      return {
+        start:startDate,
+        end:endDate
+    }
+  }
+  return null;
+}
+
 
   async getAllBelayerRecordsOfBelayerInDateRange(belayerId:string, startDate:Date,
     endDate:Date):Promise<BelayRecord[]>{
@@ -197,14 +284,7 @@ export class LedgerService {
           return []
         }
         for (let dateString of Object.keys(ledger.belay_records)){
-
-          // console.log("******************");
-          // console.log(dateString);
           const dateKey:Date = new Date(dateString);
-          // console.log("Checking dateKey:");
-          // console.log(dateKey);
-          // console.log("******************");
-
           if(startDate <= dateKey && dateKey <= endDate ){
             targetBelayRecords.push(ledger.belay_records[dateString]);
           }
@@ -224,49 +304,103 @@ export class LedgerService {
 * @params:
 */
 async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:string, startDate:Date,
-    endDate:Date):Promise<{"1_gave_2":number,"2_gave_1":number}>{
+    endDate:Date):Promise<{ [key:string]:number }>{
 
-  const allBelayRecords:BelayRecord[] =
-    await this.getAllBelayerRecordsOfBelayerInDateRange(partner1_id, startDate,endDate);
+      try{
+        const allBelayRecords:BelayRecord[] =
+          await this.getAllBelayerRecordsOfBelayerInDateRange(partner1_id, startDate,endDate);
+          const key12 = this.getBelayTimeSummaryKey(partner1_id,partner2_id);
+          const key21 = this.getBelayTimeSummaryKey(partner2_id,partner1_id);
 
-    const totals = {
-      "1_gave_2": 0,
-      "2_gave_1": 0
+          const totals = {
+            [key12]: 0,
+            [key21]: 0
+          };
+
+          allBelayRecords.forEach(( record:BelayRecord )=>{
+            if("gave" in record && partner2_id in record.gave){
+              totals[key12] += record.gave[partner2_id];
+            }
+            // if("recieved" in record && partner1_id in record.recieved){
+            //   totals[key21] += record.recieved[partner1_id];
+            // }
+            if("recieved" in record && partner2_id in record.recieved){
+              totals[key21] += record.recieved[partner2_id];
+            }
+
+          });
+
+          return totals;
+      }
+      catch(error){
+        console.log(error);
+      };
+
+  }
+
+  async getRelevantDates(partner1_id:string, partner2_id:string):Promise<{ [key:string]:Date[]}>{
+    // await this.(partner1_id,partner2_id);
+    // const key12 = this.getBelayTimeSummaryKey(partner1_id,partner2_id);
+    // const key21 = this.getBelayTimeSummaryKey(partner2_id,partner1_id);
+
+    // const dates:{ [key:string]:Date[]}= {
+    //   [key12]: [],
+    //   [key21]: []
+    // };
+    //
+
+
+    const dates:{ [key:string]:Date[]}= {
+      [partner1_id]: [],
+      [partner2_id]:[]
     };
 
-    allBelayRecords.forEach(( record:BelayRecord )=>{
-      if("gave" in record && partner2_id in record.gave){
-        totals["1_gave_2"] += record.gave[partner2_id];
+    const ledger = await this.getLedgerOfUser(partner1_id);
+    // console.log("Got ledger:");
+    // console.log(ledger);
+
+    if( ! ("belay_records" in ledger)){
+      return null;
+    }
+    for (let dateString of Object.keys(ledger.belay_records)){
+      const date:Date = new Date(dateString);
+
+      //if partner1 belayed partner2 on this date...
+      if(ledger.belay_records[dateString].gave &&
+      Object.keys(ledger.belay_records[dateString].gave).includes(partner2_id)){
+         dates[partner1_id].push(date);
       }
-      if("recieved" in record && partner1_id in record.recieved){
-        totals["2_gave_1"] += record.recieved[partner1_id];
-      }
-    });
 
-    return totals;
-  }
+      //if partner2 belayed partner1 on this date
+      if(ledger.belay_records[dateString].recieved &&
+      Object.keys(ledger.belay_records[dateString].recieved).includes(partner2_id)){
+        dates[partner2_id].push(date);
+       }
+    }
+    return dates;
+
+}
+
+getBelayTimeSummaryKey(gaveId:string, recievedId:string):string{
+  return `${gaveId}_gave_${recievedId}`
+}
 
 
-  convertDateToDDMMYYYYString(date:Date):string {
-    //this setup is a little weird, but it make convertDateToDDMMYYYYString available
-    //in other modules and it makes convertDateToDDMMYYYYString easily mockable in Jasmine with spyOn
-    return convertDateToDDMMYYYYString(date);
-  }
+convertDateToDDMMYYYYString(date:Date):string {
+  //this setup is a little weird, but it make convertDateToDDMMYYYYString_ available
+  //in other modules and it makes convertDateToDDMMYYYYString easily mockable in Jasmine with spyOn
+  return convertDateToDDMMYYYYString_(date);
+}
 
 }
 
 //TODO: this function no longer does what its title implies it does.
 //refactor with better name and/or switch to more effecient string format .
 //...using date.toString because it can easily be translated back into a date object
-export function convertDateToDDMMYYYYString(date:Date):string{
+export function convertDateToDDMMYYYYString_(date:Date):string{
   // const dateStr = date.getDay() + "/" +date.getMonth() + "/" + date.getFullYear();
   // const dateStr = date.getMonth() + "/" + date.getDay() + "/" + date.getFullYear();
   date.setHours(0,0,0,0);
   const dateStr = date.toString();
-  // console.log("&&&&&&&&&&&&&&&&&&");
-  // console.log(date);
-  // console.log(dateStr);
-  // console.log(new Date(dateStr));
-  // console.log("&&&&&&&&&&&&&&&&&&");
   return dateStr;
 }

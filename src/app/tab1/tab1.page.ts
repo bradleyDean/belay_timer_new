@@ -129,7 +129,7 @@ export class Tab1Page implements OnInit, OnDestroy{
 
   //NOTE: only this method should update stopwatchKeyForTemplate
   switchUserAndBelayer(){
-    console.log('switching!');
+    // console.log('switching!');
     const temp = this.currClimber;
     this.currClimber = this.currBelayer;
     this.currBelayer = temp;
@@ -137,7 +137,7 @@ export class Tab1Page implements OnInit, OnDestroy{
                 createStopwatchesKey(this.currBelayer.id,this.currClimber.id,true); //pass true, so triggers next time
 
     // this.currClimberElapsedTime = this.timerServ.stopWatches[this.currClimber.id].getCurrentLocalInterval();
-    console.log("DONE SWITCHING");
+    // console.log("DONE SWITCHING");
   }
 
   async confirmSwitchUser(){
@@ -148,7 +148,7 @@ export class Tab1Page implements OnInit, OnDestroy{
           {
             text:"Yes",
             handler: ( )=>{
-              console.log(`TODO: pause timer for ${this.currClimber.name}`);
+              // console.log(`TODO: pause timer for ${this.currClimber.name}`);
               this.pauseTimer();
               this.switchUserAndBelayer();
               alert.dismiss();
@@ -189,7 +189,7 @@ async startTimer(){
 
 pauseTimer(){
   //only try to pause the clock if it is running
-  console.log("********** pauseTimer called ************ ");
+  // console.log("********** pauseTimer called ************ ");
   if(this.isClockRunning()){
     // console.log("Tab1Page, pauseTimer, about to call pauseLocalWatch");
     this.timerServ.stopWatches[this.stopwatchKeyForTemplate].pauseLocalWatch();
@@ -198,7 +198,7 @@ pauseTimer(){
 
 resetTimer(){
   if(this.isClockRunning()){
-    console.log(`isClockRunning: ${this.isClockRunning()}`);
+    // console.log(`isClockRunning: ${this.isClockRunning()}`);
     this.pauseTimer();
   }
 
@@ -211,7 +211,7 @@ isClockRunning(){
 // console.log("*********** isClockRunning ***********");
 // console.log(Object.keys(this.timerServ.stopWatches).includes(this.currClimber.id.toString()));
 if(Object.keys(this.timerServ.stopWatches).includes(this.stopwatchKeyForTemplate)){
-  console.log("RETURNING isPaused from stopWatch");
+  // console.log("RETURNING isPaused from stopWatch");
     console.log(!this.timerServ.stopWatches[this.stopwatchKeyForTemplate].isPaused);
     return !this.timerServ.stopWatches[this.stopwatchKeyForTemplate].isPaused;
   }else{

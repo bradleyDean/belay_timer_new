@@ -19,7 +19,9 @@ export const routes: Routes = [
       },
       {
         path: 'tab3',
-        loadChildren: () => import('../tab3/tab3.module').then(m => m.Tab3PageModule)
+        loadChildren: () => import('../tab3/tab3.module').then(m => m.Tab3PageModule),
+        canActivate:[Tab1GuardService] //NOTE: Tab1GuardService should be renamed.
+        //...the guard prevents activation of tab3 when there is not an "owner" and climbing partner.
       },
       {
         path: '',

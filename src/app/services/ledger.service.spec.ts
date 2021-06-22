@@ -1,10 +1,10 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import { LedgerService,convertDateToDDMMYYYYString } from './ledger.service';
+import { LedgerService,convertDateToDDMMYYYYString_ } from './ledger.service';
 import { FilesService } from './files.service';
 import { BelayLedger } from '../interfaces/ledgers';
 
 import { belayLedger_1, belay_ledger_6_dates, date_1,date_2,date_3,
-   date_4, date_5, date_6 } from '../mocks_for_tests/ledger.mocks';
+   date_4, date_5, date_6, belay_ledger_for_data_summaries } from '../mocks_for_tests/ledger.mocks';
 
 describe('LedgerService: Isolated Test (using mocked file system)', () => {
   let service: LedgerService;
@@ -42,7 +42,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
     for the appropriate dates ,when ledger already exists',
     async (done:DoneFn)=>{
 
-    const date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
+    const date = convertDateToDDMMYYYYString_(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
       subject_id: "A",
@@ -81,7 +81,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
 
   it('createOrUpdateLedgerOfUser should create a new ledger, when when ledger does not exist', async (done:DoneFn)=>{
 
-    const date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
+    const date = convertDateToDDMMYYYYString_(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
       subject_id:"P",
@@ -123,7 +123,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
    BelayLedger when Ǝ ledger and date for this input date is\
     not already in the belay record', async (done:DoneFn)=>{
 
-    const existing_date = convertDateToDDMMYYYYString(new Date(1944, 7, 28));
+    const existing_date = convertDateToDDMMYYYYString_(new Date(1944, 7, 28));
 
     const belayLedger:BelayLedger = {
       subject_id:"P",
@@ -141,7 +141,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
     const partner_id = "B";
     const gave = 11;
     const recieved = 17;
-    const novel_date = convertDateToDDMMYYYYString(new Date(1944,9,29));
+    const novel_date:string = convertDateToDDMMYYYYString_(new Date(1944,9,29));
 
     const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
     const writeLedgerFileOfUserSpy = spyOn(service, "writeLedgerFileOfUser");
@@ -180,7 +180,7 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
     const partner_id = "B";
     const gave = 11;
     const recieved = 17;
-    const novel_date = convertDateToDDMMYYYYString(new Date(1944,9,29));
+    const novel_date = convertDateToDDMMYYYYString_(new Date(1944,9,29));
 
     const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
     const writeLedgerFileOfUserSpy = spyOn(service, "writeLedgerFileOfUser");
@@ -266,16 +266,49 @@ describe('LedgerService: Isolated Test (using mocked file system)', () => {
   const summary = await service.
   getBelayTimeSummaryForPartnersInDateRange("A","B",startDate,endDate);
 
-  //summary["1_gave_2"] == 100, summary["2_gave_1"] == 15
 
   expect(summary).toEqual(
     {
-      "1_gave_2":100,
-      "2_gave_1":15 }
+      "A_gave_B":100,
+      "B_gave_A":15 }
     );
   done();
 });
 
+fit("getDefaultStartAndEndDates should return date pair marking the earliest and latest\
+ that at least one user belayed the other", async (done:DoneFn )=>{
+
+    const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
+    getLedgerOfUserSpy.and.resolveTo(belay_ledger_for_data_summaries);
+
+    const dateRangeObject:{start:Date,end:Date} = await service.getDefaultStartAndEndDates("A","B");
+    console.log('TEST::  expected start:')
+    console.log(new Date(date_2));
+
+    console.log('TEST::  expected end:')
+    console.log(new Date(date_5));
+
+    expect(dateRangeObject.start).toEqual(new Date(date_2));
+    expect(dateRangeObject.end).toEqual(new Date(date_5));
+    done();
+ });
+
+fit("getRelevantDates should find all relevent dates and return them", async (done:DoneFn )=>{
+
+    const getLedgerOfUserSpy = spyOn(service,"getLedgerOfUser" );
+    getLedgerOfUserSpy.and.resolveTo(belay_ledger_for_data_summaries);
+
+    const relevantDates:{[key:string]:Date[]} = await service.getRelevantDates("A","B");
+
+    //
+    // const key12 = service.getBelayTimeSummaryKey("A","B");
+    // const key21 = service.getBelayTimeSummaryKey("B","A");
+    //
+    expect(relevantDates["A"]).toEqual([new Date(date_2)]);
+    expect(relevantDates["B"]).toEqual([new Date(date_3), new Date(date_5)]);
+
+    done();
+ });
 });
 
 

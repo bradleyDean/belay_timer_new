@@ -1,0 +1,94 @@
+ion-grid {
+  height:100%;
+}
+
+.time-container{
+  position:relative;
+  padding:1px;
+
+  width:100%;
+  height:37vh;
+
+  // border-color: yellow;
+  // border-style: solid;
+
+  text-align: right;
+}
+
+.partners-container{
+  // width:100%;
+  height:20vh;
+
+  // border-color: blue;
+  // border-style: solid;
+  margin-bottom:0px;
+  margin-right:8px;
+  margin-left:10px;
+
+  font-size: 3.5vh;
+
+}
+.partner-top{
+  // width:100%;
+  height:50%;
+
+  // border-color: red;
+  // border-style: solid;
+
+  border-top-right-radius: 24px;
+  border-top-left-radius: 24px;
+
+  background-color: var(--ion-color-dark);
+
+  color:grey;
+}
+.partner-bottom{
+  width:100%;
+  height:50%;
+
+  margin-bottom:0px;
+
+
+  border-bottom-right-radius: 24px;
+  border-bottom-left-radius: 24px;
+
+  // border-color: green;
+  // border-style: solid;
+
+  color:grey;
+  background-color: var(--ion-color-medium);
+
+}
+
+.text-bottom{
+
+  position:absolute;
+  bottom:7vh;
+  right:0;
+  // border-color: purple;
+  // border-style: solid;
+  font-size: 16vh;
+  font-weight: 200;
+
+}
+
+.start-button {
+ width:100%;
+ height:11vh;
+ margin-top:3px;
+}
+
+
+.tall-button {
+ width:100%;
+ height:10vh;
+ margin-top:3px;
+}
+
+.rounded-corners {
+  // border-top-left-radius:24px;
+  // border-top-right-radius:24px;
+  // border-bottom-left-radius:24px;
+  // border-bottom-right-radius:24px;
+  --border-radius:24px !important;
+}

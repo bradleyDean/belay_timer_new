@@ -237,7 +237,7 @@ export class TimerService {
   async saveOrUpdateBelayerTime(stopWatchesKey:string){
     try{
       const [belayerId, climberId] = stopWatchesKey.split("_");
-      // console.log(`belayerId: ${belayerId}, climberId: ${climberId}`)
+      console.log(`saveOrUpdateBelayerTime: belayerId: ${belayerId}, climberId: ${climberId}`)
 
 
       let gave:number;
@@ -269,8 +269,12 @@ export class TimerService {
         this.stopWatches[otherKey].resetLocalWatchAndWipeElapsedTotal();
       }
 
+      return 1;
+
     }
     catch(error){
+      throw error;
+      // console.log(error);
     };
   }
 

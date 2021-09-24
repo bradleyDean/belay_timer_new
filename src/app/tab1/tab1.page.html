@@ -1,49 +1,72 @@
-<ion-header [translucent]="true">
+<!-- <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
       Tab 1
     </ion-title>
   </ion-toolbar>
-</ion-header>
+</ion-header> -->
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
+  <!-- <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Tab 1</ion-title>
     </ion-toolbar>
-  </ion-header>
+  </ion-header> -->
+
+  <div class="time-container" text-bottom  *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !!timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
+    <span class="text-bottom">
+       {{ timerServ.stopWatches[stopwatchKeyForTemplate].timerSubject | async }}
+    </span>
+  </div>
+
+  <div class="time-container right-justify" *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
+    <span class="text-bottom">00</span>
+  </div>
+
+  <div class="partners-container">
+    <div class="partner-top" >
+      <span  *ngIf="partners" > {{partners[0].name}} </span> <span *ngIf="partners[0].id == currClimber.id"> Belayer </span>
+    </div>
+    <div class="partner-bottom" color="medium">
+      <span *ngIf="partners" text-align-end> {{partners[1].name}} </span> <span *ngIf="partners[1].id == currClimber.id"> Belayer </span>
+    </div>
+  </div>
 
   <ion-grid>
-    <ion-row> <ion-col size="12" class="ion-text-center"> <ion-button (click)="handleSwitchClick()"> Switch </ion-button></ion-col> </ion-row>
-    <ion-row> <ion-col size="6" class="ion-text-center"> Belayer:</ion-col> <ion-col size="6"> Climber: </ion-col> </ion-row>
+    <!-- <ion-row> <ion-col size="6" class="ion-text-center"> Belayer:</ion-col> <ion-col size="6"> Climber: </ion-col> </ion-row>
     <ion-row *ngIf="currBelayer"> <ion-col size="6" class="ion-text-center"> {{currBelayer.name}} </ion-col> <ion-col size="6"> {{currClimber.name}}</ion-col> </ion-row>
+ -->
 
-    <ion-row> <ion-col size="12" class="ion-text-center">
-        <div *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !!timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
-        {{currClimberElapsedTime}}
-        <!-- Id: {{currClimber.id}} -->
-        <!-- Time: {{timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()}} -->
-        Time: {{ timerServ.stopWatches[stopwatchKeyForTemplate].timerSubject | async }}
-        </div>
-        <div *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
-          00
-        </div>
 
-    </ion-col> </ion-row>
-
-    <ion-row>
-      <ion-col size="3"><ion-button (click)="startTimer()">Start</ion-button></ion-col>
-      <ion-col size="3"><ion-button (click)="pauseTimer()">Pause</ion-button></ion-col>
-      <ion-col size="3"><ion-button (click)="resetTimer()">Reset</ion-button></ion-col>
-
+   <ion-row>
       <ion-col size="12">
-        <ion-button class="ion-text-center" (click)="saveTimes()">
+        <ion-button *ngIf="!isClockRunning()" expand="block" class="rounded-corners start-button"  (click)="startTimer()" color="success">Start
+        </ion-button>
+      </ion-col>
+      <ion-col size="12">
+        <ion-button *ngIf="isClockRunning()" class="rounded-corners tall-button" (click)="pauseTimer()" color="warning">Pause
+        </ion-button>
+      </ion-col>
+   </ion-row>
+    <ion-row>
+      <ion-col size="6"><ion-button class="rounded-corners tall-button" (click)="resetTimer()" color="danger">
+        Reset</ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button class="rounded-corners tall-button" (click)="saveTimes()" color="tertiary">
           Save
         </ion-button>
-     </ion-col>
+      </ion-col>
+
+
 
     </ion-row>
 
+    <ion-row>
+      <ion-col size="12" class="ion-text-center">
+        <ion-button (click)="handleSwitchClick()"> Switch </ion-button>
+      </ion-col>
+    </ion-row>
 
   </ion-grid>
 

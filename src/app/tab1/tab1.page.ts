@@ -28,6 +28,8 @@ export class Tab1Page implements OnInit, OnDestroy{
   public currBelayer:UserArrayEntry = null;
   public currClimber:UserArrayEntry = null;//run the stopwatch assosiated with currClimber when currClimber is climbing
 
+  public partners:UserArrayEntry[] = null;
+
   public stopwatchKeyForTemplate:string = null;
 
 
@@ -98,6 +100,8 @@ export class Tab1Page implements OnInit, OnDestroy{
   async setDefaultClimberAndBelayer(){
     if(this.owner && this.selUser){
       const arr = [this.owner, this.selUser]
+      this.partners = arr
+      
       const climberIndex = Math.floor(Math.random() * arr.length)
       const belayerIndex = climberIndex ? 0 : 1;
 

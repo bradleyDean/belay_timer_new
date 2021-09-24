@@ -251,6 +251,7 @@ export class LedgerService {
         return null;
       }
 
+      console.log(`ledgerService,getDefaultStartAndEndDates, returning start: ${startDate}, end: ${endDate}   `);
       return {
         start:startDate,
         end:endDate

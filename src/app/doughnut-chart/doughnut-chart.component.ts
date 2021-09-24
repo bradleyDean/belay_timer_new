@@ -26,12 +26,13 @@ import { UserArrayEntry } from '../interfaces/users';
 export class DoughnutChartComponent implements OnInit {
   @Input() users: UserArrayEntry[];
   @Input() users$: Observable<UserArrayEntry[]>;
-  usersSubscription:Subscription;
+  //allowDatePickerOption: not to be confused with showDatePicker. This
+  //config input allows the OPTION of picking dates at all.
+  @Input() allowDatePickerOption:Boolean = true;
+
+  usersSubscription:Subscription = null;
   previousUsers:UserArrayEntry[] = null; //use to notice changes in the selected users
 
-  // private dataSummarySubject:BehaviorSubject<BelayDataSummary> = new BehaviorSubject(null);
-  // public dataSummaryForUsers$:Observable<BelayDataSummary> = this.dataSummarySubject.asObservable();
-  //
   startDateSubject:BehaviorSubject<Date> = new BehaviorSubject(null);
   startDate$:Observable<Date> = this.startDateSubject.asObservable();
   startDate:Date;
@@ -69,23 +70,33 @@ export class DoughnutChartComponent implements OnInit {
   dateClass:MatCalendarCellClassFunction<Date>;
 
   constructor(public ledgerServ:LedgerService, ) {
-    // console.log("doughnutChartComponent construtor!!!");
+
   }
 
   async ngOnInit(){
+    console.log(`doughnutChartComponent, ngOninit users:${this.users} `);
     // console.log("doughnut-chart component ngOnInit");
-
 
     if(!this.dateRange){ //guarantee that dateRange$ emits once, triggering the chartUpdaterSubscription
       this.dateRange = await this.ledgerServ.getDefaultStartAndEndDates(this.users[0].id,this.users[1].id);
       this.dateRangeSubject.next(this.dateRange); //this can emit null, for example if the users never climbed together.
     }
 
+    //this is inefficient. the chart updater subscrip is getting triggered once because users$ emits,
+    //then, again, because this subscription is triggering dateRangeSubject to emit
+    this.usersSubscription = this.users$.subscribe(async ( users:UserArrayEntry[] )=>{
+      // this.users =
+      this.dateRange = await this.ledgerServ.getDefaultStartAndEndDates(users[0].id,users[1].id);
+      console.log(`usersSubscription, getDefaultStartAndEndDates: start:${this.dateRange.start}, end:${this.dateRange.end}`)
+      this.dateRangeSubject.next(this.dateRange);
+    });
+
+
     /*
     * rangeFormGroupChangeSubscription triggers the dateRangeSubject's .next method.
     * dateRangeSubject will emit an updated DateRange object when the date range changes (and is valid)
     */
-    this.rangeFormGroupChangeSubscription = combineLatest([
+    this.rangeFormGroupChangeSubscription  = combineLatest([
       this.rangeFormGroup.get("start").valueChanges,
       this.rangeFormGroup.get("end").valueChanges
     ],(startDate:Date, endDate:Date)=>{
@@ -122,7 +133,8 @@ export class DoughnutChartComponent implements OnInit {
     this.chartUpdaterSubscription =
       combineLatest( this.users$, this.dateRange$, async (users:UserArrayEntry[],dateRange:DateRange)=>{
 
-        console.log(`chartUpdaterSubscription fired! :`);
+        // console.log(`doughnut-chart.component, ngOninit, this.chartUpdaterSubscription fired! :`);
+        // console.log(`this.chartUpdaterSubscription users: ${this.users[0].name, this.users[1].name}`);
         // && dateRange
         if(this.users.every(user =>!!user) ){
 
@@ -130,6 +142,7 @@ export class DoughnutChartComponent implements OnInit {
           const uid2 = users[1].id;
 
           this.users = users;
+
           this.labels = users.map( (user:UserArrayEntry) => user.name);
           this.dateRange = dateRange;
 
@@ -138,7 +151,10 @@ export class DoughnutChartComponent implements OnInit {
           (this.previousUsers && this.previousUsers.length === users.length &&
           (this.previousUsers[0] != users[0] || this.previousUsers[1] != users[1]) )){
             this.dateRange = await this.ledgerServ.getDefaultStartAndEndDates(users[0].id,users[1].id);
+            console.log(`***users changed*** new default dateRange:${ this.dateRange } `);
           }
+
+
 
           //if there is (now) a valid dateRange for these users
           //update the chart with the relevant data and show it.
@@ -175,8 +191,11 @@ export class DoughnutChartComponent implements OnInit {
 
             this.showNoDataAvailableMessage = false;
             this.dataReady = true;
-            this.showDatePicker = true;
-            console.log('doughnutChartComponent, chartUpdaterSubscription fired!');
+            if(this.allowDatePickerOption){
+              this.showDatePicker = true;
+            }
+
+            // console.log('doughnutChartComponent, chartUpdaterSubscription fired!');
           }else{//there is no available data for these users
             this.dataReady = false;
             this.showDatePicker = false;
@@ -216,8 +235,10 @@ export class DoughnutChartComponent implements OnInit {
   }
 
   ngOnDestroy(){
+    this.usersSubscription.unsubscribe();
     this.chartUpdaterSubscription.unsubscribe();
     this.rangeFormGroupChangeSubscription.unsubscribe();
+
   }
 
 

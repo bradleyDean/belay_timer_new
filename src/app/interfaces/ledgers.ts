@@ -21,3 +21,12 @@ export interface BelayLedger {
   subject_id:string,
   belay_records?:BelayRecords
 }
+
+export interface DateRange {
+  start: Date,
+  end: Date
+}
+
+export interface BelayDataSummary {
+  [key:string]:number //key: a user id, value: how much they belayed the other user
+}

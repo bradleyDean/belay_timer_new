@@ -27,15 +27,15 @@ export class Tab1GuardService implements CanActivate{
 
     const currOwner = this.uServ.getCurrentOwner();
     const currentSelUser = this.uServ.getCurrentSelUser();
-    console.log("Can Activate, currOwner:")
-    console.log(currOwner);
-    console.log("currentSelUser");
-    console.log(currentSelUser);
+    // console.log("Can Activate, currOwner:")
+    // console.log(currOwner);
+    // console.log("currentSelUser");
+    // console.log(currentSelUser);
 
     if (!currOwner || !currentSelUser){
       this.router.navigate(['/tabs/tab2']);
 
-      
+
       return false;
     }else{
 

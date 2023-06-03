@@ -14,9 +14,6 @@ import { AlertController } from '@ionic/angular';
     [] Deleting/Editing (decide if edit is necessary) users
        -decide on ux a bit: long-press user then use popup vs a delete icon with pop-up confirmation?
     [] UX: layout? Styling?
-
-  Then:
-    [] back to tab1: work on stopwatch.
   */
 
 
@@ -37,7 +34,6 @@ export class Tab2Page implements OnInit, OnDestroy {
   usersSubscrip: Subscription;
   users: UserArrayEntry[];
 
-  //TODO: some of this is probably no longer being used. Find and remove!
   displayUsersSubject: BehaviorSubject<UserArrayEntry[]>= new BehaviorSubject<UserArrayEntry[]>([]);;
   uServUsers$DisplayUsersSubscription:Subscription;
   displayUsersSubscription: Subscription;
@@ -45,11 +41,8 @@ export class Tab2Page implements OnInit, OnDestroy {
   displayUsers: UserArrayEntry[];//display this in the template. Order by alphabetical, most recent, etc.
   displayUsersOrderSetting = "most-recent";//vs "alphabetical"
 
-  // displayUsersOrderSetting = "alphabetical";//vs "alphabetical"
-
   selectedUser:UserArrayEntry;//keep this pointing to the zeroth user in users;
   selectedUserSubscription:Subscription;
-
 
   ownerChangeRequested: false;
 
@@ -60,10 +53,7 @@ export class Tab2Page implements OnInit, OnDestroy {
 
   displayDuplicateUserNameMessage = false;
 
-  // length:any;
-
   constructor(private uServ: UsersService,private alertController:AlertController )  {
-    // this.length = String.length;
   }
 
   async ngOnInit(){
@@ -73,12 +63,10 @@ export class Tab2Page implements OnInit, OnDestroy {
       await this.uServ.init();
     }
 
-    //usServe is now initialized. Is there an owner set up?
-    // console.log(`CHECKING getCurrentOwner and getCurrentOwner returns : `);
-    // console.log(this.uServe.getCurrentOwner());
-        //subscribe to the user service's owner$
     /*
-    *  ownerSubcrip controls showing and hiding the owner input box and save save button
+      usServe is now initialized. Is there an owner set up?
+      subscribe to the user service's owner$
+      ownerSubcrip controls showing and hiding the owner input box and save save button
     */
     this.ownerSubcrip = this.uServ.owner$.subscribe(( owner )=>{
       this.owner = owner;
@@ -92,27 +80,18 @@ export class Tab2Page implements OnInit, OnDestroy {
 
     this.usersSubscrip = this.uServ.users$.subscribe((users)=>{
       this.users = users;
-      // console.log("displayUsersSbscription calling displayUsers.next" );
-      // this.displayUsersSubject.next(this.getDisplayUsersFromUsers(users));
-
-
       if(!this.users || this.users && this.users.length == 0){
         this.showUsersEditor;
       }
 
     });
 
-
     this.uServUsers$DisplayUsersSubscription = this.uServ.users$.subscribe(( users )=>{
       const dispUsers =this.getDisplayUsersFromUsers(users);
-      // console.log(" this.uServUsers$DisplayUsersSubscription, setting users to: ")
-      // console.log(dispUsers);
       this.displayUsersSubject.next(dispUsers);
     });
 
     this.displayUsersSubscription = this.displayUsersSubject.subscribe(( dispUsers )=>{
-      // console.log("Setting displayUsers to:");
-      // console.log(dispUsers);
       this.displayUsers = dispUsers;
     });
 
@@ -120,24 +99,6 @@ export class Tab2Page implements OnInit, OnDestroy {
       (selUser:UserArrayEntry )=>{
         this.selectedUser = selUser;
     });
-
-
-    //
-    // map((users:UserArrayEntry[]) =>
-    //     this.getDisplayUsersFromUsers(users))(this.uServ.users$)
-    //     .subscribe((displayUsers:UserArrayEntry[])=>{
-    //       this.displayUsers = displayUsers;
-    //     });
-
-
-
-
-        // this.displayUsersSbscription = this.displayUsersSubject.subscribe(( displayUsers )=>{
-        //   console.log("udating displayUsers");
-        //   this.displayUsers = displayUsers;
-        // });
-
-
     });
 
     //TODO: write tests for this subscription
@@ -162,9 +123,6 @@ export class Tab2Page implements OnInit, OnDestroy {
           buttons:[{text:"Got it!",role:"cancel" } ],
         });
 
-        //TODO: removing the alert fixes the tests. Also, alert does not present with isolated testing (needs)
-        //tab1 component (fixture?) to create the alert. So, prob should move the alert code to the tab2 page
-        //a service probably should never present an alert, right?
         alert.present();
       }
     },1000);
@@ -179,9 +137,6 @@ export class Tab2Page implements OnInit, OnDestroy {
           buttons:[{text:"Got it!",role:"cancel" } ],
         });
 
-        //TODO: removing the alert fixes the tests. Also, alert does not present with isolated testing (needs)
-        //tab1 component (fixture?) to create the alert. So, prob should move the alert code to the tab2 page
-        //a service probably should never present an alert, right?
         duplicateUserAlert.present();
   }
 
@@ -200,23 +155,16 @@ export class Tab2Page implements OnInit, OnDestroy {
         return u1.name > u2.name ? 1 : -1;
       });
 
-      // console.log('getDisplayUsersFromUsers, returning alphabetical: ');
-      // console.log(dispUsers);
-
       return dispUsers;
-      // return [...this.users].sort();
     }
   }
 
   toggleDisplayUsersOrderSetting(){
     if(this.displayUsersOrderSetting == "most-recent"){
-      // console.log('setting mode to alphabetical');
       this.displayUsersOrderSetting = "alphabetical";
     }else if(this.displayUsersOrderSetting == "alphabetical"){
-      // console.log('setting mode to most-recent');
       this.displayUsersOrderSetting = "most-recent"
     }
-    // console.log("toggling alphabetical");
     this.displayUsersSubject.next(this.getDisplayUsersFromUsers(this.users));
   }
 
@@ -227,7 +175,6 @@ export class Tab2Page implements OnInit, OnDestroy {
       buttons:[
         {text:"No",role:"cancel"},
         {text:"Yes!",handler:async ( )=>{
-        //TODO: update deleteUser logic in uServ after ledger service code is written
         await this.uServ.deleteUser(user);
         }
       }],
@@ -246,14 +193,9 @@ export class Tab2Page implements OnInit, OnDestroy {
     }
     catch(error){
       this.createDuplicateUserAlert();
-      // this.createCompleteUserSetupAlert();
       this.ownerNameFromTemplate = null;
     };
   }
-  /*
-  *
-  *
-  */
   async updateNewUser(){
     try{
       await this.uServ.updateUsersArray(this.newUserName);
@@ -271,9 +213,7 @@ export class Tab2Page implements OnInit, OnDestroy {
       }
     };
   }
-
   ngOnDestroy(){
-
     // if(this.ownerSubcrip){
     //   this.ownerSubcrip.unsubscribe();
     //   this.ownerSubcrip = null;

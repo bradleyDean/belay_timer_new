@@ -1,0 +1,38 @@
+
+<div *ngIf="showDatePicker">
+  <mat-form-field>
+    <mat-label>Enter a date range</mat-label>
+    <mat-date-range-input [formGroup]="rangeFormGroup" [rangePicker]="picker" >
+      <input matStartDate matInput
+        placeholder="Start Date"
+        formControlName="start"
+       >
+      <input matEndDate matInput
+        placeholder="End date"
+        formControlName="end"
+      >
+    </mat-date-range-input>
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+
+    <mat-date-range-picker
+      #picker
+      touchUi
+      [dateClass]="dateClass" >
+    </mat-date-range-picker>
+  </mat-form-field>
+</div>
+
+<div *ngIf="dataReady" style="display: block">
+  <canvas baseChart
+    [data]="totalTimes"
+    [labels]="labels"
+    [chartType]="doughnutChartType">
+
+  </canvas>
+</div>
+<div class="danger" *ngIf="showNoDataAvailableMessage">
+  <h1> {{users[0].name}} and {{users[1].name}} have never belayed each other!</h1>
+</div>
+<div>
+  <h1>{{users[0].name}} and {{users[1].name}}</h1>
+</div>

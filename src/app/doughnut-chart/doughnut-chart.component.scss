@@ -1,0 +1,23 @@
+// "rgba(255,0,0,1)"
+.owner-color{
+  background: red;
+  border-radius:100%;
+}
+
+// "rgba(0,0,255,1)"
+.partner-color{
+  background-color:blue;
+  border-radius:100%;
+}
+
+.both-color{
+  background: linear-gradient(
+    to right,
+    red 0%,
+    red 50%,
+    blue 50%,
+    blue  100%
+  );
+
+  border-radius:100%;
+}

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LedgerService } from '../services/ledger.service';
 import { UserArrayEntry } from '../interfaces/users';
-import { BehaviorSubject, Observable,ReplaySubject } from '../../../node_modules/rxjs';
+import { BehaviorSubject, Observable } from '../../../node_modules/rxjs';
 
 
 class StopWatch {
@@ -20,15 +20,7 @@ class StopWatch {
     this.belayerId= belayerId;
     this.climberId=climberId;
     this.worker = worker;
-    // this.timerSubject = timerSub;
-    //startLocalWatch actually registers this callback with this.webworker
-    // this.onMessageCallback = (event) => {
-    //   console.log(`timer.service, onMessageCallback...user: ${this.uid} got time as: ${event.data} seconds.`);
-    //   console.log(event.data);
-    //   this.localTotalElapsedSeconds = event.data + this.previousElapsedSeconds;
-    //   console.log(`this.localTotalElapsedSeconds: ${this.localTotalElapsedSeconds}` );
-    //   timerSubject.next(this.localTotalElapsedSeconds);
-    // }
+
   }
 
   /*
@@ -37,13 +29,10 @@ class StopWatch {
   startLocalWatch(){
     //there might not be a callback, ready to recieve the messages
     if(!this.worker.onmessage){// pauseLocalWatch sets onmessage to null
-      // console.log("setting onMessageCallback")
       this.setOnMessageCallback();
     }
-    // console.log("Posting start to worker");
     this.worker.postMessage("start");
     this.isPaused = false;
-    // console.log(`belayerId: ${this.belayerId} ... isPaused: ${this.isPaused}`)
   }
 
   /*
@@ -55,7 +44,6 @@ class StopWatch {
     this.isPaused = true;
     //onMessageCallback counts up from this.previousElapsedSeconds to update localTotalElapsedSeconds
     this.previousElapsedSeconds = this.localTotalElapsedSeconds;
-    // console.log(`previousElapsedSeconds is now: ${this.previousElapsedSeconds}`)
   }
 
 
@@ -87,14 +75,9 @@ class StopWatch {
   // the webworker)
   setOnMessageCallback(){
     this.worker.onmessage =   this.onMessageCallback = (event) => {
-      // console.log(`timer.service, onMessageCallback...user: ${this.uid} got time as: ${event.data} seconds.`);
-      // console.log(event.data);
       this.localTotalElapsedSeconds = event.data + this.previousElapsedSeconds;
-      // console.log(`this.localTotalElapsedSeconds: ${this.localTotalElapsedSeconds}` );
       this.timerSubject.next(this.localTotalElapsedSeconds);
     }
-    // console.log("in setOnMessageCallback and worker is:")
-    // console.log(this.worker);
   }
 
   disableOnMessageCallback(){
@@ -108,8 +91,6 @@ class StopWatch {
   providedIn: 'root'
 })
 export class TimerService {
-  // elapsedSeconds = 0;
-  // simulatedBadTime = 0; //TODO: just for testing: delete this
   stopWatches:{[key:string]: StopWatch} = {}; //key is the userId of the person with this stopwatch
   // localTimer:any; //a setInterval instance
 
@@ -118,12 +99,8 @@ export class TimerService {
   timerWorker: any = null;
 
   constructor(private ledgerServ: LedgerService) {
-    // this.stopWatch = new StopWatch();
-    // console.log("TimerService constructor")
-    // const timerWorker = new Worker(TIMER_WORKER_PATH);
-
     //NOTE: passing path by reference (with a const declared at top of file) does not work. Why? Don't know.
-    this.timerWorker = new Worker("./workers/timer.worker", { type: `module` } );
+    this.timerWorker = new Worker(new URL('./workers/timer.worker', import.meta.url), { type: `module` } );
     }
 
     async initializeStopwatchesForUserPair(belayerId:string, climberId:string){
@@ -154,7 +131,7 @@ export class TimerService {
       // console.log("B");
       if (!this.timerWorker){
         // console.log("Setting up timer worker and it is:");
-        this.timerWorker = new Worker("./workers/timer.worker", { type: `module` } );
+        this.timerWorker = new Worker(new URL('./workers/timer.worker', import.meta.url), { type: `module` } );
         // console.log(this.timerWorker);
       }
       const watch = new StopWatch(belayerId, climberId, this.timerWorker, this.elapsedTimeSubject);
@@ -183,7 +160,7 @@ export class TimerService {
 
       if (!this.timerWorker){
         // console.log("Setting up timer worker and it is:");
-        this.timerWorker = new Worker("./workers/timer.worker", { type: `module` } );
+        this.timerWorker = new Worker(new URL('./workers/timer.worker', import.meta.url), { type: `module` } );
         // console.log(this.timerWorker);
       }
 
@@ -237,7 +214,7 @@ export class TimerService {
   async saveOrUpdateBelayerTime(stopWatchesKey:string){
     try{
       const [belayerId, climberId] = stopWatchesKey.split("_");
-      console.log(`belayerId: ${belayerId}, climberId: ${climberId}`)
+      console.log(`saveOrUpdateBelayerTime: belayerId: ${belayerId}, climberId: ${climberId}`)
 
 
       let gave:number;
@@ -269,8 +246,12 @@ export class TimerService {
         this.stopWatches[otherKey].resetLocalWatchAndWipeElapsedTotal();
       }
 
+      return 1;
+
     }
     catch(error){
+      throw error;
+      // console.log(error);
     };
   }
 

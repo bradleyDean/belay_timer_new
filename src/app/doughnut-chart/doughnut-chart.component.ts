@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input, ViewEncapsulation } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl } from '@angular/forms';
 
 import { Observable, BehaviorSubject, Subscription, combineLatest, forkJoin } from '../../../node_modules/rxjs';
 
@@ -52,9 +52,9 @@ export class DoughnutChartComponent implements OnInit {
   chartUpdaterSubscription:Subscription; //combines relevant observables and triggers chart property reassignments
 
   //this is bound throug a directive on the mat-date-range-input in the template
-  rangeFormGroup = new FormGroup({
-    start: new FormControl(),
-    end: new FormControl()
+  rangeFormGroup = new UntypedFormGroup({
+    start: new UntypedFormControl(),
+    end: new UntypedFormControl()
   });
 
   rangeFormGroupChangeSubscription:Subscription;

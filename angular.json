@@ -33,7 +33,14 @@
             ],
             "styles": ["./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css", "src/theme/variables.scss", "src/global.scss"],
             "scripts": [],
-            "webWorkerTsConfig": "tsconfig.worker.json"
+            "webWorkerTsConfig": "tsconfig.worker.json",
+            "aot": false,
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -62,7 +69,8 @@
             "ci": {
               "progress": false
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",

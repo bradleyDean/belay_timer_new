@@ -100,7 +100,7 @@ export class TimerService {
 
   constructor(private ledgerServ: LedgerService) {
     //NOTE: passing path by reference (with a const declared at top of file) does not work. Why? Don't know.
-    this.timerWorker = new Worker("./workers/timer.worker", { type: `module` } );
+    this.timerWorker = new Worker(new URL('./workers/timer.worker', import.meta.url), { type: `module` } );
     }
 
     async initializeStopwatchesForUserPair(belayerId:string, climberId:string){
@@ -131,7 +131,7 @@ export class TimerService {
       // console.log("B");
       if (!this.timerWorker){
         // console.log("Setting up timer worker and it is:");
-        this.timerWorker = new Worker("./workers/timer.worker", { type: `module` } );
+        this.timerWorker = new Worker(new URL('./workers/timer.worker', import.meta.url), { type: `module` } );
         // console.log(this.timerWorker);
       }
       const watch = new StopWatch(belayerId, climberId, this.timerWorker, this.elapsedTimeSubject);
@@ -160,7 +160,7 @@ export class TimerService {
 
       if (!this.timerWorker){
         // console.log("Setting up timer worker and it is:");
-        this.timerWorker = new Worker("./workers/timer.worker", { type: `module` } );
+        this.timerWorker = new Worker(new URL('./workers/timer.worker', import.meta.url), { type: `module` } );
         // console.log(this.timerWorker);
       }
 

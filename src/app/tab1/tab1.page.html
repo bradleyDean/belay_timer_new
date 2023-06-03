@@ -1,18 +1,4 @@
-<!-- <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
-  </ion-toolbar>
-</ion-header> -->
-
 <ion-content [fullscreen]="true">
-  <!-- <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header> -->
-
   <div class="time-container" text-bottom  *ngIf="timerServ.stopWatches && timerServ.stopWatches[stopwatchKeyForTemplate] && !!timerServ.stopWatches[stopwatchKeyForTemplate].getCurrentLocalInterval()">
     <span class="text-bottom">
        {{ timerServ.stopWatches[stopwatchKeyForTemplate].timerSubject | async }}
@@ -33,11 +19,6 @@
   </div>
 
   <ion-grid>
-    <!-- <ion-row> <ion-col size="6" class="ion-text-center"> Belayer:</ion-col> <ion-col size="6"> Climber: </ion-col> </ion-row>
-    <ion-row *ngIf="currBelayer"> <ion-col size="6" class="ion-text-center"> {{currBelayer.name}} </ion-col> <ion-col size="6"> {{currClimber.name}}</ion-col> </ion-row>
- -->
-
-
    <ion-row>
       <ion-col size="12">
         <ion-button *ngIf="!isClockRunning()" expand="block" class="rounded-corners start-button"  (click)="startTimer()" color="success">Start

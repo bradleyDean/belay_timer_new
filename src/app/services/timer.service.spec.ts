@@ -60,8 +60,8 @@ xdescribe('TimerService', () => {
     let secondsElapsed = 0;
 
     const watchObserver = service.elapsedTimeObservable$.subscribe((num)=>{
-      console.log("COUNTING!!!!!!! Count is:");
-      console.log(num);
+      // console.log("COUNTING!!!!!!! Count is:");
+      // console.log(num);
       secondsElapsed = num
       if(num == 13){
         watchObserver.unsubscribe();

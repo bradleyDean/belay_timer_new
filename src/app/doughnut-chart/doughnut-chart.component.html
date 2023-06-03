@@ -1,11 +1,5 @@
 
 <div *ngIf="showDatePicker">
-
-
-        <!-- (dateChange)="handleStartDateChange($event)"
-        (dateInput)="handleStartDateChange($event)" -->
-          <!-- (dateChange)="handleEndDateChange($event)"
-        (dateInput)="handleEndDateChange($event)"  -->
   <mat-form-field>
     <mat-label>Enter a date range</mat-label>
     <mat-date-range-input [formGroup]="rangeFormGroup" [rangePicker]="picker" >
@@ -42,25 +36,3 @@
 <div>
   <h1>{{users[0].name}} and {{users[1].name}}</h1>
 </div>
-
-<!-- <div class="owner-color">
-<h1> TEST TEST</h1>
-</div> -->
-
-
-<!-- <div style="display: block">
-<canvas baseChart
-  [attr.data]="doughnutChartData"
-  [attr.labels]="doughnutChartLabels"
-  [attr.chartType]="doughnutChartType">
-</canvas>
-</div>
- -->
-
-<!-- <div style="display: block">
-  <canvas baseChart
-    [data]="doughnutChartData"
-    [labels]="doughnutChartLabels"
-    [chartType]="doughnutChartType">
-  </canvas>
-</div> -->

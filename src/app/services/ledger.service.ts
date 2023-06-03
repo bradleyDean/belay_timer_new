@@ -11,9 +11,6 @@ import { pathMap } from '../shared_constants/paths';
 })
 export class LedgerService {
 
-  // private dataSummarySubject:BehaviorSubject<BelayDataSummary> = new BehaviorSubject(null);
-  // public dataSummaryForUsers$:Observable<BelayDataSummary> = this.dataSummarySubject.asObservable();
-  //
   constructor(private fService: FilesService) {}
 
   createBelayRecord(partner_id:string, gave:number, recieved:number):BelayRecord{
@@ -67,7 +64,6 @@ export class LedgerService {
         ledger.belay_records[date] = belay_record
         return ledger
       }
-
   }
 
   /*
@@ -86,7 +82,6 @@ export class LedgerService {
 
     if(ledger){
       ledger["subject_id"] = subject_id;
-      // this.updateBelayLedger(ledger,date,partner_id,gave,recieved);
 
       if(! ( Object.keys(ledger)).includes("belay_records")){
         //[*]tested
@@ -182,21 +177,14 @@ export class LedgerService {
   */
   async getDefaultStartAndEndDates(uid1:string, uid2:string):Promise<DateRange>{
     const ledger = await this.getLedgerOfUser(uid1);
-    // console.log("getDefaultStartAndEndDates got ledger as:");
-    // console.log(ledger)  ;
 
     if(ledger && Object.keys(ledger).includes("belay_records") ){
       const records = ledger.belay_records;
 
-      // console.log("getDefaultStartAndEndDates got records as:");
-      // console.log(records);
-
       const dates = Object.keys(records);
-      // console.log("******* dates ***********");
-      // console.log(dates);
 
-      let startDate:Date = null; // = new Date(dates[0]);
-      let endDate:Date = null; //= new Date(dates[0]);
+      let startDate:Date = null;
+      let endDate:Date = null;
 
       dates.forEach(( dateString )=>{
         const tempDate = new Date(dateString);
@@ -204,9 +192,6 @@ export class LedgerService {
         const belayRecord = records[dateString];
         if(Object.keys(belayRecord).includes("gave")){
           //did uid1 belay uid2 on this date?
-
-          // console.log("getDefaultStartAndEndDates got belayRecord as:");
-          // console.log(belayRecord);
 
           if(Object.keys(belayRecord["gave"]).includes(uid2) ){
             if(!startDate){
@@ -239,19 +224,11 @@ export class LedgerService {
           }
         }
       });
-      // console.log("returning:");
-      // console.log(
-      //   {
-      //     start:startDate,
-      //     end:endDate
-      //   });
 
       if(!startDate || !endDate){
-        console.log(`******ledgerServ, startDate:${startDate}, endDate: ${endDate}******** `);
         return null;
       }
 
-      console.log(`ledgerService,getDefaultStartAndEndDates, returning start: ${startDate}, end: ${endDate}   `);
       return {
         start:startDate,
         end:endDate
@@ -322,9 +299,7 @@ async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:
             if("gave" in record && partner2_id in record.gave){
               totals[key12] += record.gave[partner2_id];
             }
-            // if("recieved" in record && partner1_id in record.recieved){
-            //   totals[key21] += record.recieved[partner1_id];
-            // }
+
             if("recieved" in record && partner2_id in record.recieved){
               totals[key21] += record.recieved[partner2_id];
             }
@@ -340,16 +315,6 @@ async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:
   }
 
   async getRelevantDates(partner1_id:string, partner2_id:string):Promise<{ [key:string]:Date[]}>{
-    // await this.(partner1_id,partner2_id);
-    // const key12 = this.getBelayTimeSummaryKey(partner1_id,partner2_id);
-    // const key21 = this.getBelayTimeSummaryKey(partner2_id,partner1_id);
-
-    // const dates:{ [key:string]:Date[]}= {
-    //   [key12]: [],
-    //   [key21]: []
-    // };
-    //
-
 
     const dates:{ [key:string]:Date[]}= {
       [partner1_id]: [],
@@ -357,8 +322,6 @@ async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:
     };
 
     const ledger = await this.getLedgerOfUser(partner1_id);
-    // console.log("Got ledger:");
-    // console.log(ledger);
 
     if( ! ("belay_records" in ledger)){
       return null;
@@ -379,13 +342,11 @@ async getBelayTimeSummaryForPartnersInDateRange(partner1_id:string, partner2_id:
        }
     }
     return dates;
-
 }
 
 getBelayTimeSummaryKey(gaveId:string, recievedId:string):string{
   return `${gaveId}_gave_${recievedId}`
 }
-
 
 convertDateToDDMMYYYYString(date:Date):string {
   //this setup is a little weird, but it make convertDateToDDMMYYYYString_ available
@@ -399,8 +360,6 @@ convertDateToDDMMYYYYString(date:Date):string {
 //refactor with better name and/or switch to more effecient string format .
 //...using date.toString because it can easily be translated back into a date object
 export function convertDateToDDMMYYYYString_(date:Date):string{
-  // const dateStr = date.getDay() + "/" +date.getMonth() + "/" + date.getFullYear();
-  // const dateStr = date.getMonth() + "/" + date.getDay() + "/" + date.getFullYear();
   date.setHours(0,0,0,0);
   const dateStr = date.toString();
   return dateStr;

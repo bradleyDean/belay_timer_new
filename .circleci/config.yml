@@ -7,6 +7,10 @@ jobs:
       - image: cimg/node:20.2.0
     steps:
       - checkout
+      - run: 
+          name: Clean modules
+          command: |
+            rm -rf ./node_modules/karma-chrome-launcher
       - restore_cache:
           keys:
             - dependency-cache-{{ checksum "package-lock.json" }}

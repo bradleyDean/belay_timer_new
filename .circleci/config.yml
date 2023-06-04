@@ -2,15 +2,21 @@ version: 2.1
 jobs:
   build:
     environment:
-      - CI: true # Used by karma.conf.js to determine whether or not to use a headless browser.
+      CI: true # Used by karma.conf.js to determine whether or not to use a headless browser.
+      CHROME_BIN: /usr/bin/google-chrome-stable
+
     docker:
       - image: cimg/node:20.2.0
     steps:
       - checkout
+      - run: 
+          name: Clean modules
+          command: |
+            rm -rf ./node_modules/karma-chrome-launcher
       - restore_cache:
           keys:
             - dependency-cache-{{ checksum "package-lock.json" }}
-            - dependency-cache-
+            - dependency-cache-v2
       - run:
           name: Install dependencies
           command: npm install
@@ -19,8 +25,21 @@ jobs:
           paths:
             - ./node_modules
       - run:
+          name: Install Google Chrome
+          command: |
+            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+            echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+            sudo apt-get update
+            sudo apt-get install -y google-chrome-stable
+      - run:
+          name: Verify Chrome installation
+          command: |
+            echo $CHROME_BIN
+            $CHROME_BIN --version
+      - run:
           name: Run tests
-          command: npm run test
+          command: |
+            npm run test
 workflows:
   version: 2
   build:

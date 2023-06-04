@@ -2,6 +2,7 @@
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
 module.exports = function (config) {
+  const isCi = process.env.CI === 'true'; // CI is set in .circleci/config.yaml
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
@@ -36,9 +37,16 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
-    browsers: process.env.CI ? ['ChromeHeadless'] : ['Chrome'],
-    singleRun: false,
-    restartOnFileChange: true
+    autoWatch: !isCi,
+    browsers: process.env.CI ? ['MyHeadlessChrome'] : ['Chrome'],
+    customLaunchers: {
+    MyHeadlessChrome: {
+      base: 'ChromeHeadless',
+      flags: ['--no-sandbox'],
+      binary: '/usr/bin/google-chrome',
+    },
+},
+    singleRun: isCi,
+    restartOnFileChange: !isCi 
   });
 };

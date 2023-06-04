@@ -11,7 +11,8 @@ import { BelayDataSummary } from '../interfaces/ledgers';
 
 import { ChartType } from 'chart.js';
 
-import {  Label, MultiDataSet, SingleDataSet } from 'ng2-charts';
+// import {  Label, MultiDataSet, SingleDataSet } from 'ng2-charts';
+// import {  SingleDataSet } from 'ng2-charts';
 
 import { LedgerService } from '../services/ledger.service';
 import { DateRange } from '../interfaces/ledgers';
@@ -59,8 +60,8 @@ export class DoughnutChartComponent implements OnInit {
 
   rangeFormGroupChangeSubscription:Subscription;
 
-  public labels: Label[] = [];
-  public totalTimes: SingleDataSet = [];
+  public labels: string[] = [];
+  public totalTimes: [number,number] | [] = [];
 
   public doughnutChartType: ChartType = 'doughnut';
 

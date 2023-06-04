@@ -1,6 +1,8 @@
 version: 2.1
 jobs:
   build:
+    environment:
+      - CI: true # Used by karma.conf.js to determine whether or not to use a headless browser.
     docker:
       - image: cimg/node:20.2.0
     steps:

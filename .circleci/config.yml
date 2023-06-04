@@ -10,7 +10,7 @@ jobs:
       - restore_cache:
           keys:
             - dependency-cache-{{ checksum "package-lock.json" }}
-            - dependency-cache-v1
+            - dependency-cache-v2
       - run:
           name: Install dependencies
           command: npm install

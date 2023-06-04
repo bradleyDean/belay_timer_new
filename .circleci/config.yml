@@ -26,11 +26,11 @@ jobs:
             sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
             sudo apt-get update
             sudo apt-get install -y google-chrome-stable --no-install-recommends
-      - run:
-          name: Verify Chrome installation
-          command: |
-            echo $CHROME_BIN
-            $CHROME_BIN --version
+      # - run:
+      #     name: Verify Chrome installation
+      #     command: |
+      #       echo $CHROME_BIN
+      #       $CHROME_BIN --version
       - run:
           name: Run tests
           command: npm run test

@@ -37,7 +37,9 @@ jobs:
       #       $CHROME_BIN --version
       - run:
           name: Run tests
-          command: npm run test
+          command: |
+            export CHROME_BIN=/usr/bin/google-chrome
+            npm run test
 workflows:
   version: 2
   build:

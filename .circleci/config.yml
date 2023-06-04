@@ -1,0 +1,28 @@
+version: 2.1
+orbs:
+  node: circleci/node@4.1.0
+jobs:
+  build:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run:
+                name: Install Dependencies
+                command: npm install
+            # - run:
+            #     name: Check Code Style with Prettier
+            #     command: npx prettier --check "src/**/*.{ts,js,css,html}"
+            - run:
+                name: Run Tests
+                command: npm run test
+            - run:
+                name: Build
+                command: npm run build
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build

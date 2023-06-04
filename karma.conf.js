@@ -38,9 +38,9 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: !isCi,
-    browsers: process.env.CI ? ['ChromeHeadlessCustom'] : ['Chrome'],
+    browsers: process.env.CI ? ['MyHeadlessChrome'] : ['Chrome'],
     customLaunchers: {
-    ChromeHeadlessCustom: {
+    MyHeadlessChrome: {
       base: 'ChromeHeadless',
       flags: ['--no-sandbox'],
       binary: '/usr/bin/google-chrome',
